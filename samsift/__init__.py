@@ -15,7 +15,7 @@ import pysam
 sys.path.append(os.path.dirname(__file__))
 from version import *
 
-def sam_sift(in_sam_fn, out_sam_fn, sieve, dexprs=[]):
+def sam_sift(in_sam_fn, out_sam_fn, sieve, dexpr, dtrig):
 	in_sam=pysam.AlignmentFile(in_sam_fn, "rb") #check_sq=False)
 	out_sam = pysam.AlignmentFile(out_sam_fn, "w", template=in_sam)
 	for a in in_sam.fetch(until_eof=True):
@@ -36,26 +36,26 @@ def sam_sift(in_sam_fn, out_sam_fn, sieve, dexprs=[]):
 		vardict2=dict(a.get_tags())
 		vardict={**vardict1, **vardict2}
 		p=eval(sieve, vardict)
-		if len(dexprs)>0:
-			res=[eval(dexpr, vardict) for dexpr in dexprs]
-			print(a.query_name, bool(p), *res, file=sys.stderr, sep="\t")
+		if dexpr is not None:
+			trig=eval(str(dtrig), vardict)
+			if trig:
+				res=eval(dexpr, vardict)
+				print(a.query_name, bool(p), res, file=sys.stderr, sep="\t")
 		if p:
 			out_sam.write(a)
 
 def main():
-	parser = argparse.ArgumentParser(description="Program: samsift (sift your SAM files)\nVersion: {}\nAuthor:  Karel Brinda <kbrinda@hsph.harvard.edu>".format(VERSION), formatter_class=argparse.RawDescriptionHelpFormatter)
+	parser = argparse.ArgumentParser(description=
+			"Program: samsift (sift your SAM files)\n"+
+			"Version: {}\n"+
+			"Author:  Karel Brinda <kbrinda@hsph.harvard.edu>".format(VERSION), formatter_class=argparse.RawDescriptionHelpFormatter)
 
 	parser.add_argument('sieve',
 			type=str,
 			metavar='expr',
 			help='sieve (a Python expression)',
-		)
-
-	parser.add_argument('dexprs',
-			type=str,
-			metavar='debug_expr',
-			help='debugging expression (a Python expression)',
-			nargs="+",
+			nargs='?',
+			default='True'
 		)
 
 	parser.add_argument('-i',
@@ -76,9 +76,31 @@ def main():
 			help="output SAM/BAM file ['-', i.e., stdout]",
 		)
 
+	parser.add_argument('-d',
+			type=str,
+			metavar='expr',
+			dest='dexpr',
+			help='debugging expression to print (a Python expression)',
+			default=None,
+		)
+
+	parser.add_argument('-t',
+			type=str,
+			metavar='expr',
+			dest='dtrig',
+			help='debugging trigger (a Python expression) ["True"]',
+			default="True",
+		)
+
 	args = parser.parse_args()
 
-	sam_sift(args.in_sam_fn, args.out_sam_fn, args.sieve, args.dexprs)
+	sam_sift(
+			in_sam_fn=args.in_sam_fn,
+			out_sam_fn=args.out_sam_fn,
+			sieve=args.sieve,
+			dexpr=args.dexpr,
+			dtrig=args.dtrig,
+		)
 
 if __name__ == "__main__":
 	main()
