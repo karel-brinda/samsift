@@ -7,16 +7,13 @@ Author:  Karel Brinda <kbrinda@hsph.harvard.edu>
 License: MIT
 """
 
-
 import argparse
 import os
 import sys
 import pysam
 
-# todo: fix pipes
-# todo: specify scope
-# todo: put sam spec fields into variables
-# todo: put tags into variables
+sys.path.append(os.path.dirname(__file__))
+from version import *
 
 def sam_sift(in_sam_fn, out_sam_fn, sieve, dexprs=[]):
 	in_sam=pysam.AlignmentFile(in_sam_fn, "rb") #check_sq=False)
@@ -46,7 +43,7 @@ def sam_sift(in_sam_fn, out_sam_fn, sieve, dexprs=[]):
 			out_sam.write(a)
 
 def main():
-	parser = argparse.ArgumentParser(description="Program: samsift (sift your SAM files)\nVersion: 0.0.1\nAuthor: Karel Brinda (kbrinda@hsph.harvard.edu)")
+	parser = argparse.ArgumentParser(description="Program: samsift (sift your SAM files)\nVersion: {}\nAuthor: Karel Brinda <kbrinda@hsph.harvard.edu>".format(VERSION), formatter_class=argparse.RawDescriptionHelpFormatter)
 
 	parser.add_argument('sieve',
 			type=str,
@@ -63,20 +60,20 @@ def main():
 
 	parser.add_argument('-i',
 			type=str,
-			metavar='str',
+			metavar='in.sam',
 			dest='in_sam_fn',
 			default='-',
 			required=False,
-			help='input SAM/BAM file [-]',
+			help="input SAM/BAM file ['-', i.e., stdin]",
 		)
 
 	parser.add_argument('-o',
 			type=str,
-			metavar='str',
+			metavar='out.sam',
 			dest='out_sam_fn',
 			default='-',
 			required=False,
-			help='output SAM/BAM file [-]',
+			help="output SAM/BAM file ['-', i.e., stdout]",
 		)
 
 	args = parser.parse_args()
