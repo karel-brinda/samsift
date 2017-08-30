@@ -43,7 +43,7 @@ def sam_sift(in_sam_fn, out_sam_fn, sieve, dexprs=[]):
 			out_sam.write(a)
 
 def main():
-	parser = argparse.ArgumentParser(description="Program: samsift (sift your SAM files)\nVersion: {}\nAuthor: Karel Brinda <kbrinda@hsph.harvard.edu>".format(VERSION), formatter_class=argparse.RawDescriptionHelpFormatter)
+	parser = argparse.ArgumentParser(description="Program: samsift (sift your SAM files)\nVersion: {}\nAuthor:  Karel Brinda <kbrinda@hsph.harvard.edu>".format(VERSION), formatter_class=argparse.RawDescriptionHelpFormatter)
 
 	parser.add_argument('sieve',
 			type=str,
