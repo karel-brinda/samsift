@@ -18,12 +18,32 @@ import pysam
 # todo: put sam spec fields into variables
 # todo: put tags into variables
 
-def sam_sift(in_sam_fn, out_sam_fn, sieve):
+def sam_sift(in_sam_fn, out_sam_fn, sieve, dexprs=[]):
 	in_sam=pysam.AlignmentFile(in_sam_fn, "rb") #check_sq=False)
 	out_sam = pysam.AlignmentFile(out_sam_fn, "w", template=in_sam)
-	for read in in_sam.fetch(until_eof=True):
-		if eval(sieve):
-			out_sam.write(read)
+	for a in in_sam.fetch(until_eof=True):
+		vardict1={
+			'a': a,
+			'QNAME': a.query_name,
+			'FLAG': a.flag,
+			'RNAME': a.reference_id,
+			'POS': a.reference_start+1,
+			'MAPQ': a.mapping_quality,
+			'CIGAR': a.cigarstring,
+			'RNEXT': a.next_reference_id,
+			'PNEXT': a.next_reference_start+1,
+			'TLEN': a.template_length,
+			'SEQ': a.query_sequence,
+			'QUAL': a.query_qualities,
+		}
+		vardict2=dict(a.get_tags())
+		vardict={**vardict1, **vardict2}
+		p=eval(sieve, vardict)
+		if len(dexprs)>0:
+			res=[eval(dexpr, vardict) for dexpr in dexprs]
+			print(a.query_name, bool(p), *res, file=sys.stderr, sep="\t")
+		if p:
+			out_sam.write(a)
 
 def main():
 	parser = argparse.ArgumentParser(description="Program: samsift (sift your SAM files)\nVersion: 0.0.1\nAuthor: Karel Brinda (kbrinda@hsph.harvard.edu)")
@@ -32,6 +52,13 @@ def main():
 			type=str,
 			metavar='expr',
 			help='sieve (a Python expression)',
+		)
+
+	parser.add_argument('dexprs',
+			type=str,
+			metavar='debug_expr',
+			help='debugging expression (a Python expression)',
+			nargs="+",
 		)
 
 	parser.add_argument('-i',
@@ -54,7 +81,7 @@ def main():
 
 	args = parser.parse_args()
 
-	sam_sift(args.in_sam_fn, args.out_sam_fn, args.sieve)
+	sam_sift(args.in_sam_fn, args.out_sam_fn, args.sieve, args.dexprs)
 
 if __name__ == "__main__":
 	main()
