@@ -1,7 +1,7 @@
 SAMsift
 =======
 
-SAMsift is a program for advanced filtering and tagging alignments in SAM/BAM format
+SAMsift is a program for advanced filtering and tagging of SAM/BAM alignments
 using Python expressions.
 
 
@@ -56,7 +56,7 @@ Command-line parameters
         usage: samsift.py [-h] [-v] [-i file] [-o file] [-f py_expr] [-c py_code]
                           [-d py_expr] [-t py_expr]
 
-        Program: samsift (sift and enrich SAM/BAM alignments using Python expressions)
+        Program: samsift (advanced filtering and tagging of SAM/BAM alignments using Python expressions)
         Version: 0.1.0
         Author:  Karel Brinda <kbrinda@hsph.harvard.edu>
 
@@ -69,6 +69,7 @@ Command-line parameters
           -c py_code     code to be executed (e.g., assigning new tags) [None]
           -d py_expr     debugging expression to print [None]
           -t py_expr     debugging trigger [True]
+
 
 
 Algorithm

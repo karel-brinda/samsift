@@ -1,4 +1,4 @@
-.PHONY: all clean pypi test html
+.PHONY: all clean pypi test html desc
 
 SHELL=/usr/bin/env bash
 
@@ -16,6 +16,9 @@ pypi:
 
 html:
 	rst2html.py README.rst > README.html
+
+desc:
+	./samsift/samsift -h 2>&1 | pbcopy
 
 test:
 	$(MAKE) -C tests

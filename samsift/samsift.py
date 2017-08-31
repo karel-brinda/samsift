@@ -18,6 +18,7 @@ import version
 
 PROGRAM='samsift'
 VERSION=version.VERSION
+DESC='advanced filtering and tagging of SAM/BAM alignments using Python expressions'
 
 
 def info(msg):
@@ -94,7 +95,7 @@ def sam_sift(in_sam_fn, out_sam_fn, sieve, code, dexpr, dtrig):
 def main():
 
 	parser = argparse.ArgumentParser(description=
-			"Program: {} (sift and enrich SAM/BAM alignments using Python expressions)\n".format(PROGRAM)+
+			"Program: {} ({})\n".format(PROGRAM, DESC)+
 			"Version: {}\n".format(VERSION) +
 			"Author:  Karel Brinda <kbrinda@hsph.harvard.edu>",
 			formatter_class=argparse.RawDescriptionHelpFormatter
