@@ -1,6 +1,6 @@
 #! /usr/bin/env python3
 
-"""SAMsift - sift SAM/BAM alignments using Python expressions
+"""SAMsift - sift and enrich SAM/BAM alignments using Python expressions
 
 Author:  Karel Brinda <kbrinda@hsph.harvard.edu>
 
@@ -15,24 +15,43 @@ import pysam
 sys.path.append(os.path.dirname(__file__))
 import version
 
+PROGRAM='samsift'
+VERSION=version.VERSION
+
 def sam_sift(in_sam_fn, out_sam_fn, sieve, code, dexpr, dtrig):
 	in_sam=pysam.AlignmentFile(in_sam_fn, "rb") #check_sq=False)
-	out_sam = pysam.AlignmentFile(out_sam_fn, "w", template=in_sam)
+	#print("@PG", "ID:{}".format(PROGRAM), "PN:{}".format(PROGRAM), "VN:{}".format(VERSION), "CL:{}".format(" ".join(sys.argv)), sep="\t")
+	header=in_sam.header
+
+	pg={
+			"ID":PROGRAM,
+			"PN":PROGRAM,
+			"VN":VERSION,
+			"CL":" ".join(map(lambda x:"'{}'".format(x),sys.argv)),
+		}
+
+	try:
+		header['PG'].insert(0,pg)
+	except KeyError:
+		header['PG']=[pg]
+
+	out_sam = pysam.AlignmentFile(out_sam_fn, "w", header=header)
+
 	for a in in_sam.fetch(until_eof=True):
 		vardict1={
-			'a': a,
-			'QNAME': a.query_name,
-			'FLAG': a.flag,
-			'RNAME': a.reference_id,
-			'POS': a.reference_start+1,
-			'MAPQ': a.mapping_quality,
-			'CIGAR': a.cigarstring,
-			'RNEXT': a.next_reference_id,
-			'PNEXT': a.next_reference_start+1,
-			'TLEN': a.template_length,
-			'SEQ': a.query_sequence,
-			'QUAL': a.query_qualities,
-		}
+				'a': a,
+				'QNAME': a.query_name,
+				'FLAG': a.flag,
+				'RNAME': a.reference_id,
+				'POS': a.reference_start+1,
+				'MAPQ': a.mapping_quality,
+				'CIGAR': a.cigarstring,
+				'RNEXT': a.next_reference_id,
+				'PNEXT': a.next_reference_start+1,
+				'TLEN': a.template_length,
+				'SEQ': a.query_sequence,
+				'QUAL': a.query_qualities,
+				}
 		vardict2=dict(a.get_tags())
 		vardict={**vardict1, **vardict2}
 		p=eval(sieve, vardict)
@@ -42,7 +61,7 @@ def sam_sift(in_sam_fn, out_sam_fn, sieve, code, dexpr, dtrig):
 				res=eval(dexpr, vardict)
 				print(a.query_name, bool(p), res, file=sys.stderr, sep="\t")
 		if p:
-			if code!="":
+			if code is not None:
 				vardict_new=vardict.copy()
 				exec(code, vardict)
 				for k,v in vardict.items():
@@ -57,60 +76,66 @@ def sam_sift(in_sam_fn, out_sam_fn, sieve, code, dexpr, dtrig):
 def main():
 
 	parser = argparse.ArgumentParser(description=
-			"Program: samsift (sift SAM/BAM alignments using Python expressions)\n"+
-			"Version: {}\n".format(version.VERSION) +
+			"Program: {} (sift and enrich SAM/BAM alignments using Python expressions)\n".format(PROGRAM)+
+			"Version: {}\n".format(VERSION) +
 			"Author:  Karel Brinda <kbrinda@hsph.harvard.edu>",
 			formatter_class=argparse.RawDescriptionHelpFormatter
-		)
+			)
 
-	parser.add_argument('sieve',
-			type=str,
-			metavar='expr',
-			help='sieve (a Python expression)',
-			nargs='?',
-			default='True'
-		)
+	parser.add_argument('-v', '--version',
+			action='version',
+			version='{} {}'.format(PROGRAM, VERSION),
+			)
 
 	parser.add_argument('-i',
 			type=str,
-			metavar='in.sam',
+			metavar='file',
 			dest='in_sam_fn',
 			default='-',
 			required=False,
-			help="input SAM/BAM file ['-', i.e., stdin]",
-		)
-
-	parser.add_argument('-c',
-			type=str,
-			metavar='code',
-			dest='code',
-			default='',
-			required=False,
-			help="code to be executed (e.g., assigning new tags)",
-		)
+			help="input SAM/BAM file [-]",
+			)
 
 	parser.add_argument('-o',
 			type=str,
-			metavar='out.sam',
+			metavar='file',
 			dest='out_sam_fn',
 			default='-',
 			required=False,
-			help="output SAM/BAM file ['-', i.e., stdout]",
-		)
+			help="output SAM/BAM file [-]",
+			)
+
+	parser.add_argument('-f',
+			type=str,
+			metavar='py_expr',
+			help='filter [True]',
+			dest='sieve',
+			required=False,
+			default='True'
+			)
+
+	parser.add_argument('-c',
+			type=str,
+			metavar='py_code',
+			dest='code',
+			default=None,
+			required=False,
+			help="code to be executed (e.g., assigning new tags) [None]",
+			)
 
 	parser.add_argument('-d',
 			type=str,
-			metavar='expr',
+			metavar='py_expr',
 			dest='dexpr',
-			help='debugging expression to print (a Python expression)',
+			help='debugging expression to print [None]',
 			default=None,
 		)
 
 	parser.add_argument('-t',
 			type=str,
-			metavar='expr',
+			metavar='py_expr',
 			dest='dtrig',
-			help='debugging trigger (a Python expression) ["True", i.e., all]',
+			help='debugging trigger [True]',
 			default="True",
 		)
 
