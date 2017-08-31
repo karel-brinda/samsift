@@ -2,7 +2,7 @@ SAMsift
 =======
 
 SAMsift is a program for filtering and enriching alignments in SAM/BAM format
-using Python expressions.
+using Python expressions. It can be used for advanced filtration and tagging.
 
 
 Getting started
@@ -128,7 +128,7 @@ Similar programs
 ----------------
 
 * `samtools view <http://www.htslib.org/doc/samtools.html>`_ can filter alignments based on FLAGS, read group tags, and CIGAR strings.
-* `sambamba view <http://lomereiter.github.io/sambamba/docs/sambamba-view.html>`_ supports, in addition to SAMtools, filtration using `simple expression <https://github.com/lomereiter/sambamba/wiki/%5Bsambamba-view%5D-Filter-expression-syntax>`_. However, it's not possible to compare different tags.
+* `sambamba view <http://lomereiter.github.io/sambamba/docs/sambamba-view.html>`_ supports, in addition to SAMtools, filtration using `simple perl expression <https://github.com/lomereiter/sambamba/wiki/%5Bsambamba-view%5D-Filter-expression-syntax>`_. However, it's not possible to compare different tags.
 
 Author
 ------
