@@ -60,7 +60,7 @@ setuptools.setup(
 
    entry_points={
 		'console_scripts': [
-			'samsift = samsift:main',
+			'samsift = samsift.samsift:main',
 		],
 	},
 )

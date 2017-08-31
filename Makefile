@@ -1,4 +1,4 @@
-.PHONY: all clean pypi
+.PHONY: all clean pypi test
 
 SHELL=/usr/bin/env bash -euc -o pipefail
 
@@ -12,3 +12,5 @@ clean:
 pypi:
 	/usr/bin/env python3 setup.py sdist bdist_wheel upload
 
+test:
+	$(MAKE) -C test
