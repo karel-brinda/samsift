@@ -1,8 +1,8 @@
 SAMsift
 =======
 
-SAMsift is a program for filtering and enriching alignments in SAM/BAM format
-using Python expressions. It can be used for advanced filtration and tagging.
+SAMsift is a program for advanced filtering and tagging alignments in SAM/BAM format
+using Python expressions.
 
 
 Getting started
