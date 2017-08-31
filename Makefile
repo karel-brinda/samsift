@@ -1,4 +1,4 @@
-.PHONY: all clean pypi test
+.PHONY: all clean pypi test html
 
 SHELL=/usr/bin/env bash -euc -o pipefail
 
@@ -12,6 +12,9 @@ clean:
 
 pypi:
 	/usr/bin/env python3 setup.py sdist bdist_wheel upload
+
+html:
+	rst2html.py README.rst > README.html
 
 test:
 	$(MAKE) -C tests
