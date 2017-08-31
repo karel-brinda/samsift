@@ -8,9 +8,10 @@ License: MIT
 """
 
 import argparse
+import datetime
 import os
-import sys
 import pysam
+import sys
 
 sys.path.append(os.path.dirname(__file__))
 import version
@@ -18,7 +19,18 @@ import version
 PROGRAM='samsift'
 VERSION=version.VERSION
 
+
+def info(msg):
+	dt = datetime.datetime.now()
+	fdt = dt.strftime("%Y-%m-%d %H:%M:%S")
+	print("[samsift]", fdt, msg, file=sys.stderr)
+
+
 def sam_sift(in_sam_fn, out_sam_fn, sieve, code, dexpr, dtrig):
+	info("Starting.")
+	if in_sam_fn=='-':
+		info("Reading from standard input. Press Ctrl+D to finish reading or run '{} -h' for help.".format(PROGRAM))
+
 	in_sam=pysam.AlignmentFile(in_sam_fn, "rb") #check_sq=False)
 	#print("@PG", "ID:{}".format(PROGRAM), "PN:{}".format(PROGRAM), "VN:{}".format(VERSION), "CL:{}".format(" ".join(sys.argv)), sep="\t")
 	header=in_sam.header
@@ -37,7 +49,9 @@ def sam_sift(in_sam_fn, out_sam_fn, sieve, code, dexpr, dtrig):
 
 	out_sam = pysam.AlignmentFile(out_sam_fn, "w", header=header)
 
+	nt,np,nf=0,0,0
 	for a in in_sam.fetch(until_eof=True):
+		nt+=1
 		vardict1={
 				'a': a,
 				'QNAME': a.query_name,
@@ -72,6 +86,10 @@ def sam_sift(in_sam_fn, out_sam_fn, sieve, code, dexpr, dtrig):
 						else:
 							a.set_tag(k, v)
 			out_sam.write(a)
+			np+=1
+		else:
+			nf+=1
+	info("Finishing. {} alignments processed. {} alignments passed. {} alignments filtered out.".format(nt, np, nf))
 
 def main():
 
@@ -149,6 +167,7 @@ def main():
 			dexpr=args.dexpr,
 			dtrig=args.dtrig,
 		)
+
 
 if __name__ == "__main__":
 	main()
