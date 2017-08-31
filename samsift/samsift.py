@@ -15,7 +15,7 @@ import pysam
 sys.path.append(os.path.dirname(__file__))
 import version
 
-def sam_sift(in_sam_fn, out_sam_fn, sieve, dexpr, dtrig):
+def sam_sift(in_sam_fn, out_sam_fn, sieve, code, dexpr, dtrig):
 	in_sam=pysam.AlignmentFile(in_sam_fn, "rb") #check_sq=False)
 	out_sam = pysam.AlignmentFile(out_sam_fn, "w", template=in_sam)
 	for a in in_sam.fetch(until_eof=True):
@@ -42,6 +42,16 @@ def sam_sift(in_sam_fn, out_sam_fn, sieve, dexpr, dtrig):
 				res=eval(dexpr, vardict)
 				print(a.query_name, bool(p), res, file=sys.stderr, sep="\t")
 		if p:
+			if code!="":
+				vardict_new=vardict.copy()
+				exec(code, vardict)
+				for k,v in vardict.items():
+					if len(k)==2:
+						if isinstance(v, float):
+							# workaround (see "https://github.com/pysam-developers/pysam/issues/531")
+							a.set_tag(k, v, value_type="f")
+						else:
+							a.set_tag(k, v)
 			out_sam.write(a)
 
 def main():
@@ -70,6 +80,15 @@ def main():
 			help="input SAM/BAM file ['-', i.e., stdin]",
 		)
 
+	parser.add_argument('-c',
+			type=str,
+			metavar='code',
+			dest='code',
+			default='',
+			required=False,
+			help="code to be executed (e.g., assigning new tags)",
+		)
+
 	parser.add_argument('-o',
 			type=str,
 			metavar='out.sam',
@@ -91,7 +110,7 @@ def main():
 			type=str,
 			metavar='expr',
 			dest='dtrig',
-			help='debugging trigger (a Python expression) ["True"]',
+			help='debugging trigger (a Python expression) ["True", i.e., all]',
 			default="True",
 		)
 
@@ -101,6 +120,7 @@ def main():
 			in_sam_fn=args.in_sam_fn,
 			out_sam_fn=args.out_sam_fn,
 			sieve=args.sieve,
+			code=args.code,
 			dexpr=args.dexpr,
 			dtrig=args.dtrig,
 		)
