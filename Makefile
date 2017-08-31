@@ -1,10 +1,10 @@
 .PHONY: all clean pypi test html
 
-SHELL=/usr/bin/env bash -euc -o pipefail
+SHELL=/usr/bin/env bash
 
 .SECONDARY:
 
-all:
+all: html
 
 
 clean:
