@@ -18,7 +18,7 @@ html:
 	rst2html.py README.rst > README.html
 
 desc:
-	./samsift/samsift -h 2>&1 | pbcopy
+	./samsift/samsift -h 2>&1 | perl -pe 's/(.*)/\t\1/g' | pbcopy
 
 inc:
 	./samsift/increment_version.py
