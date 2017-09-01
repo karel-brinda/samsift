@@ -1,6 +1,6 @@
 #! /usr/bin/env python3
 
-"""SAMsift - sift and enrich SAM/BAM alignments using Python expressions
+"""SAMsift - advanced filtering and tagging of SAM/BAM alignments using Python expressions
 
 Author:  Karel Brinda <kbrinda@hsph.harvard.edu>
 
@@ -49,7 +49,12 @@ def sam_sift(in_sam_fn, out_sam_fn, filter, code, dexpr, dtrig):
 		except KeyError:
 			header['PG']=[pg]
 
-		with pysam.AlignmentFile(out_sam_fn, "w", header=header) as out_sam:
+		if out_sam_fn[-4:]==".bam":
+			out_mode="wb"
+		else:
+			out_mode="w"
+
+		with pysam.AlignmentFile(out_sam_fn, out_mode, header=header) as out_sam:
 
 			nt,np,nf=0,0,0
 			for a in in_sam.fetch(until_eof=True):
