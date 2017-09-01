@@ -51,25 +51,28 @@ Installation
 Command-line parameters
 -----------------------
 
+.. USAGE-BEGIN
+
 .. code-block::
+	 
+	Program: samsift (advanced filtering and tagging of SAM/BAM alignments using Python expressions)
+	Version: 0.1.0
+	Author:  Karel Brinda <kbrinda@hsph.harvard.edu>
+	
+	Usage:   samsift.py [-h] [-v] [-i FILE] [-o FILE] [-f PY_EXPR] [-c PY_CODE] [-d PY_EXPR] [-t PY_EXPR]
+	
+	Options:
+	  -h, --help            show this help message and exit
+	  -v, --version         show program's version number and exit
+	  -i FILE               input SAM/BAM file [-]
+	  -o FILE               output SAM/BAM file [-]
+	  -f PY_EXPR            filter [True]
+	  -c PY_CODE            code to be executed (e.g., assigning new tags) [None]
+	  -d PY_EXPR            debugging expression to print [None]
+	  -t PY_EXPR            debugging trigger [True]
+	
 
-        usage: samsift.py [-h] [-v] [-i file] [-o file] [-f py_expr] [-c py_code]
-                          [-d py_expr] [-t py_expr]
-
-        Program: samsift (advanced filtering and tagging of SAM/BAM alignments using Python expressions)
-        Version: 0.1.0
-        Author:  Karel Brinda <kbrinda@hsph.harvard.edu>
-
-        optional arguments:
-          -h, --help     show this help message and exit
-          -v, --version  show program's version number and exit
-          -i file        input SAM/BAM file [-]
-          -o file        output SAM/BAM file [-]
-          -f py_expr     filter [True]
-          -c py_code     code to be executed (e.g., assigning new tags) [None]
-          -d py_expr     debugging expression to print [None]
-          -t py_expr     debugging trigger [True]
-
+.. USAGE-END
 
 Algorithm
 ---------
