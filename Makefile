@@ -1,4 +1,4 @@
-.PHONY: all clean pypi test test_readme readme README.rst README.html inc
+.PHONY: all clean pypi test test1 test2 readme README.rst README.html inc
 
 SHELL=/usr/bin/env bash
 
@@ -32,13 +32,15 @@ inc:
 	./samsift/increment_version.py
 	$(MAKE) readme
 
-test: test_readme
-	$(MAKE) -C tests
+test: test1 test2
 
-test_readme:
+test1:
 	cat README.rst \
 	     | grep -E '       ' \
 	     | perl -pe 's/^\s*//g' \
 	     | grep -E "^samsift" \
 	     | perl -pe 's/^samsift /samsift\/samsift /g' \
 	     | xargs -L 1 bash -x
+
+test2:
+	$(MAKE) -C tests
