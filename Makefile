@@ -30,6 +30,7 @@ README.rst:
 
 inc:
 	./samsift/increment_version.py
+	$(MAKE) readme
 
 test:
 	$(MAKE) -C tests
