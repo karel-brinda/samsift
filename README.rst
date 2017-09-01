@@ -129,7 +129,7 @@ Similar programs
 
 * `samtools view <http://www.htslib.org/doc/samtools.html>`_ can filter alignments based on FLAGS, read group tags, and CIGAR strings.
 * `sambamba view <http://lomereiter.github.io/sambamba/docs/sambamba-view.html>`_ supports, in addition to SAMtools, filtration using `simple perl expression <https://github.com/lomereiter/sambamba/wiki/%5Bsambamba-view%5D-Filter-expression-syntax>`_. However, it's not possible to compare different tags.
-* `bamPals <https://github.com/zeeev/bamPals>` adds tags XB, XE, XP and XL.
+* `bamPals <https://github.com/zeeev/bamPals>`_ adds tags XB, XE, XP and XL.
 
 
 Author
