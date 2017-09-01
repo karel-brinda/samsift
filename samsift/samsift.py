@@ -28,7 +28,7 @@ def info(msg):
 	print("[samsift]", fdt, msg, file=sys.stderr)
 
 
-def sam_sift(in_sam_fn, out_sam_fn, filter, code, dexpr, dtrig):
+def sam_sift(in_sam_fn, out_sam_fn, filter, code, dexpr, dtrig, mode):
 	info("Starting.")
 	if in_sam_fn=='-':
 		info("Reading from standard input. Press Ctrl+D to finish reading or run '{} -h' for help.".format(PROGRAM))
@@ -56,46 +56,72 @@ def sam_sift(in_sam_fn, out_sam_fn, filter, code, dexpr, dtrig):
 
 		with pysam.AlignmentFile(out_sam_fn, out_mode, header=header) as out_sam:
 
-			nt,np,nf=0,0,0
-			for a in in_sam.fetch(until_eof=True):
+			nt,np,nf,ne=0,0,0,0
+			for alignment in in_sam.fetch(until_eof=True):
+				err=False
 				nt+=1
 				vardict={
-						'a': a,
-						'QNAME': a.query_name,
-						'FLAG': a.flag,
-						'RNAME': a.reference_id,
-						'POS': a.reference_start+1,
-						'MAPQ': a.mapping_quality,
-						'CIGAR': a.cigarstring,
-						'RNEXT': a.next_reference_id,
-						'PNEXT': a.next_reference_start+1,
-						'TLEN': a.template_length,
-						'SEQ': a.query_sequence,
-						'QUAL': a.query_qualities,
+						'a': alignment,
+						'QNAME': alignment.query_name,
+						'FLAG': alignment.flag,
+						'RNAME': alignment.reference_id,
+						'POS': alignment.reference_start+1,
+						'MAPQ': alignment.mapping_quality,
+						'CIGAR': alignment.cigarstring,
+						'RNEXT': alignment.next_reference_id,
+						'PNEXT': alignment.next_reference_start+1,
+						'TLEN': alignment.template_length,
+						'SEQ': alignment.query_sequence,
+						'QUAL': alignment.query_qualities,
 						}
-				vardict.update(a.get_tags())
-				p=eval(filter, vardict)
+				vardict.update(alignment.get_tags())
+				try:
+					passes=eval(filter, vardict)
+				except:
+					err=True
+					if mode=="strict":
+						raise
+					elif mode=="nonstop-keep":
+						passes=True
+						ne+=1
+					elif mode=="nonstop-remove":
+						passes=False
+						ne+=1
+					else:
+						raise NotImplementedError
 				if dexpr != "":
 					trig=eval(str(dtrig), vardict)
 					if trig:
-						res=eval(dexpr, vardict)
-						print(a.query_name, bool(p), res, file=sys.stderr, sep="\t")
-				if p:
+						dbg_res=eval(dexpr, vardict)
+						print(alignment.query_name, bool(passes), dbg_res, file=sys.stderr, sep="\t")
+				if passes:
 					if code is not None:
-						vardict_new=vardict.copy()
-						exec(code, vardict)
-						for k,v in vardict.items():
+						try:
+							exec(code, vardict)
+						except:
+							if mode=="strict":
+								raise
+							else:
+								if err==False:
+									ne+=1
+								err=True
+								info("Alignment '{}' - code error ('{}')".format(alignment.query_name, sys.exc_info()[0]))
+
+
+						for k, v in vardict.items():
 							if len(k)==2:
 								if isinstance(v, float):
 									# workaround (see "https://github.com/pysam-developers/pysam/issues/531")
-									a.set_tag(k, v, value_type="f")
+									alignment.set_tag(k, v, value_type="f")
 								else:
-									a.set_tag(k, v)
-					out_sam.write(a)
-					np+=1
+									alignment.set_tag(k, v)
+					out_sam.write(alignment)
+					if not err:
+						np+=1
 				else:
-					nf+=1
-	info("Finishing. {} alignments processed. {} alignments passed. {} alignments filtered out.".format(nt, np, nf))
+					if not err:
+						nf+=1
+	info("Finishing. {} alignments processed. {} alignments passed. {} alignments filtered out. {} alignments caused errors.".format(nt, np, nf, ne))
 
 def main():
 
@@ -126,7 +152,7 @@ def main():
 			return formatter.format_help()
 
 	parser = CustomArgumentParser (
-			formatter_class=argparse.RawDescriptionHelpFormatter,
+			formatter_class=argparse.RawTextHelpFormatter,
 			description=
 			"Program: {} ({})\n".format(PROGRAM, DESC)+
 			"Version: {}\n".format(VERSION) +
@@ -193,6 +219,14 @@ def main():
 			default=["True"],
 		)
 
+	parser.add_argument('-m',
+			choices=['strict', 'nonstop-keep', 'nonstop-remove'],
+			metavar='STR',
+			help='mode: strict (stop upon first error)\n      nonstop-keep (keep alignments causing errors)\n      nonstop-remove (remove alignments causing errors) [strict]',
+			dest='mode',
+			default='strict',
+		)
+
 	args = parser.parse_args()
 
 	sam_sift(
@@ -202,6 +236,7 @@ def main():
 			code=" ".join(args.code_l),
 			dexpr=" ".join(args.dexpr_l),
 			dtrig=" ".join(args.dtrig_l),
+			mode=args.mode,
 		)
 
 

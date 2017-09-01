@@ -63,13 +63,13 @@ Command-line parameters
 .. USAGE-BEGIN
 
 .. code-block::
-
+	 
 	Program: samsift (advanced filtering and tagging of SAM/BAM alignments using Python expressions)
 	Version: 0.1.0
 	Author:  Karel Brinda <kbrinda@hsph.harvard.edu>
-
-	Usage:   samsift.py [-h] [-v] [-i FILE] [-o FILE] [-f PY_EXPR] [-c PY_CODE] [-d PY_EXPR] [-t PY_EXPR]
-
+	
+	Usage:   samsift.py [-h] [-v] [-i FILE] [-o FILE] [-f PY_EXPR] [-c PY_CODE] [-d PY_EXPR] [-t PY_EXPR] [-m STR]
+	
 	Options:
 	  -h, --help            show this help message and exit
 	  -v, --version         show program's version number and exit
@@ -79,7 +79,10 @@ Command-line parameters
 	  -c PY_CODE            code to be executed (e.g., assigning new tags) [None]
 	  -d PY_EXPR            debugging expression to print [None]
 	  -t PY_EXPR            debugging trigger [True]
-
+	  -m STR                mode: strict (stop upon first error)
+	                              nonstop-keep (keep alignments causing errors)
+	                              nonstop-remove (remove alignments causing errors) [strict]
+	
 
 .. USAGE-END
 
