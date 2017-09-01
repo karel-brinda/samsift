@@ -27,7 +27,7 @@ def info(msg):
 	print("[samsift]", fdt, msg, file=sys.stderr)
 
 
-def sam_sift(in_sam_fn, out_sam_fn, sieve, code, dexpr, dtrig):
+def sam_sift(in_sam_fn, out_sam_fn, filter, code, dexpr, dtrig):
 	info("Starting.")
 	if in_sam_fn=='-':
 		info("Reading from standard input. Press Ctrl+D to finish reading or run '{} -h' for help.".format(PROGRAM))
@@ -53,7 +53,7 @@ def sam_sift(in_sam_fn, out_sam_fn, sieve, code, dexpr, dtrig):
 	nt,np,nf=0,0,0
 	for a in in_sam.fetch(until_eof=True):
 		nt+=1
-		vardict1={
+		vardict={
 				'a': a,
 				'QNAME': a.query_name,
 				'FLAG': a.flag,
@@ -67,10 +67,9 @@ def sam_sift(in_sam_fn, out_sam_fn, sieve, code, dexpr, dtrig):
 				'SEQ': a.query_sequence,
 				'QUAL': a.query_qualities,
 				}
-		vardict2=dict(a.get_tags())
-		vardict={**vardict1, **vardict2}
-		p=eval(sieve, vardict)
-		if dexpr is not None:
+		vardict.update(a.get_tags())
+		p=eval(filter, vardict)
+		if dexpr != "":
 			trig=eval(str(dtrig), vardict)
 			if trig:
 				res=eval(dexpr, vardict)
@@ -109,53 +108,55 @@ def main():
 	parser.add_argument('-i',
 			type=str,
 			metavar='file',
+			help="input SAM/BAM file [-]",
 			dest='in_sam_fn',
 			default='-',
 			required=False,
-			help="input SAM/BAM file [-]",
 			)
 
 	parser.add_argument('-o',
 			type=str,
 			metavar='file',
+			help="output SAM/BAM file [-]",
 			dest='out_sam_fn',
 			default='-',
 			required=False,
-			help="output SAM/BAM file [-]",
 			)
 
 	parser.add_argument('-f',
 			type=str,
 			metavar='py_expr',
 			help='filter [True]',
-			dest='sieve',
-			required=False,
-			default='True'
+			dest='filter_l',
+			nargs='*',
+			default=['True'],
 			)
 
 	parser.add_argument('-c',
 			type=str,
 			metavar='py_code',
-			dest='code',
-			default=None,
-			required=False,
 			help="code to be executed (e.g., assigning new tags) [None]",
+			dest='code_l',
+			nargs='*',
+			default=['None'],
 			)
 
 	parser.add_argument('-d',
 			type=str,
 			metavar='py_expr',
-			dest='dexpr',
 			help='debugging expression to print [None]',
-			default=None,
+			dest='dexpr_l',
+			nargs='*',
+			default=[],
 		)
 
 	parser.add_argument('-t',
 			type=str,
 			metavar='py_expr',
-			dest='dtrig',
 			help='debugging trigger [True]',
-			default="True",
+			dest='dtrig_l',
+			nargs='*',
+			default=["True"],
 		)
 
 	args = parser.parse_args()
@@ -163,10 +164,10 @@ def main():
 	sam_sift(
 			in_sam_fn=args.in_sam_fn,
 			out_sam_fn=args.out_sam_fn,
-			sieve=args.sieve,
-			code=args.code,
-			dexpr=args.dexpr,
-			dtrig=args.dtrig,
+			filter=" ".join(args.filter_l),
+			code=" ".join(args.code_l),
+			dexpr=" ".join(args.dexpr_l),
+			dtrig=" ".join(args.dtrig_l),
 		)
 
 
