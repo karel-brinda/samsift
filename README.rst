@@ -54,13 +54,13 @@ Command-line parameters
 .. USAGE-BEGIN
 
 .. code-block::
-
+	 
 	Program: samsift (advanced filtering and tagging of SAM/BAM alignments using Python expressions)
 	Version: 0.1.0
 	Author:  Karel Brinda <kbrinda@hsph.harvard.edu>
-
+	
 	Usage:   samsift.py [-h] [-v] [-i FILE] [-o FILE] [-f PY_EXPR] [-c PY_CODE] [-d PY_EXPR] [-t PY_EXPR]
-
+	
 	Options:
 	  -h, --help            show this help message and exit
 	  -v, --version         show program's version number and exit
@@ -70,7 +70,7 @@ Command-line parameters
 	  -c PY_CODE            code to be executed (e.g., assigning new tags) [None]
 	  -d PY_EXPR            debugging expression to print [None]
 	  -t PY_EXPR            debugging trigger [True]
-
+	
 
 .. USAGE-END
 
@@ -87,12 +87,20 @@ Algorithm
                         print(ALIGNMENT)
 
 
-**SAM fields.** All Python expressions can access variables mirroring all the
-fields from the alignment section of the `SAM specification
+**Python expression.** All expressions should be valid `Python 3 expressions
+<https://docs.python.org/3/reference/expressions.html>`_. They are evaluated
+using the `eval <https://docs.python.org/3/library/functions.html#eval>`_
+function.
+
+**Python code.** Code is executed using the `exec
+<https://docs.python.org/3/library/functions.html#exec>`_ function.
+
+**SAM fields.** All Python expressions and code can access variables mirroring
+all the fields from the alignment section of the `SAM specification
 <https://samtools.github.io/hts-specs/SAMv1.pdf>`_, i.e., `QNAME`, `FLAG`,
 `RNAME`, `POS` (1-based), `MAPQ`, `CIGAR` , `RNEXT`, `PNEXT`, `TLEN`, `SEQ`,
-and `QUAL`.  For instance, keeping only reads with `POS` smaller than  10000
-can be done by
+and `QUAL`.  For instance, we can filter reads, keeping only those with `POS`
+smaller than 10000, by
 
 .. code-block:: bash
 

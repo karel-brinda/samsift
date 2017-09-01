@@ -36,7 +36,7 @@ test: test_readme
 	$(MAKE) -C tests
 
 test_readme:
-	PATH=./samsift/:$$PATH cat README.rst \
+	cat README.rst \
 	     | grep -E '       ' \
 	     | perl -pe 's/^\s*//g' \
 	     | grep -E "^samsift" \
