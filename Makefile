@@ -1,4 +1,4 @@
-.PHONY: all clean pypi test html desc
+.PHONY: all clean pypi test html desc inc
 
 SHELL=/usr/bin/env bash
 
@@ -19,6 +19,9 @@ html:
 
 desc:
 	./samsift/samsift -h 2>&1 | pbcopy
+
+inc:
+	./samsift/increment_version.py
 
 test:
 	$(MAKE) -C tests
