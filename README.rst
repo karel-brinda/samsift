@@ -13,9 +13,9 @@ Getting started
        git clone http://github.com/karel-brinda/samsift
        cd samsift
        # keep only alignments with alignment score >94
-       samsift/samsift -i tests/test.bam -o filtered.sam -f 'AS>94'
+       samsift/samsift -i tests/test.bam -o filtered.bam -f 'AS>94'
        # add tags 'ln' with sequence length and 'ab' with average base quality
-       samsift/samsift -i tests/test.bam -o with_ln_ab.sam -c 'ln=len(SEQ);ab=1.0*sum(QUAL)/ln'
+       samsift/samsift -i tests/test.bam -o with_ln_ab.bam -c 'ln=len(SEQ);ab=1.0*sum(QUAL)/ln'
 
 
 Installation
@@ -54,13 +54,13 @@ Command-line parameters
 .. USAGE-BEGIN
 
 .. code-block::
-	 
+
 	Program: samsift (advanced filtering and tagging of SAM/BAM alignments using Python expressions)
 	Version: 0.1.0
 	Author:  Karel Brinda <kbrinda@hsph.harvard.edu>
-	
+
 	Usage:   samsift.py [-h] [-v] [-i FILE] [-o FILE] [-f PY_EXPR] [-c PY_CODE] [-d PY_EXPR] [-t PY_EXPR]
-	
+
 	Options:
 	  -h, --help            show this help message and exit
 	  -v, --version         show program's version number and exit
@@ -70,7 +70,7 @@ Command-line parameters
 	  -c PY_CODE            code to be executed (e.g., assigning new tags) [None]
 	  -d PY_EXPR            debugging expression to print [None]
 	  -t PY_EXPR            debugging trigger [True]
-	
+
 
 .. USAGE-END
 
@@ -87,8 +87,8 @@ Algorithm
                         print(ALIGNMENT)
 
 
-All Python expressions can access variables mirroring the fields from the
-alignment section of the `SAM specification
+**SAM fields.** All Python expressions can access variables mirroring all the
+fields from the alignment section of the `SAM specification
 <https://samtools.github.io/hts-specs/SAMv1.pdf>`_, i.e., `QNAME`, `FLAG`,
 `RNAME`, `POS` (1-based), `MAPQ`, `CIGAR` , `RNEXT`, `PNEXT`, `TLEN`, `SEQ`,
 and `QUAL`.  For instance, keeping only reads with `POS` smaller than  10000
@@ -99,19 +99,19 @@ can be done by
         samsift -i tests/test.bam -f 'POS<10000'
 
 
-The PySAM representation of current alignment (class `pysam.AlignedSegment
+The PySAM representation of the current alignment (class `pysam.AlignedSegment
 <http://pysam.readthedocs.io/en/latest/api.html#pysam.AlignedSegment>`_) is
-available through variable `a`. Therefore, the previous example is equivalent
+available through the variable `a`. Therefore, the previous example is equivalent
 to
 
 .. code-block:: bash
 
-        samsift -i tests/test.bam -f 'a.reference_starts+1<10000'
+        samsift -i tests/test.bam -f 'a.reference_start+1<10000'
 
 
-All SAM tags are translated to variables with equal name. For instance, if
-alignment score is provided through the `AS` tag (as it is defined in the
-`Sequence Alignment/Map Optional Fields Specification
+**SAM tags.** All SAM tags are translated to variables with the same name. For
+instance, if alignment scores are provided through the `AS` tag (as defined in
+the `Sequence Alignment/Map Optional Fields Specification
 <https://samtools.github.io/hts-specs/SAMtags.pdf>`_), then alignments with
 score smaller or equal to the sequence length can be removed using
 
@@ -124,7 +124,7 @@ For instance, a tag `ab` carrying the average base quality can be added by
 
 .. code-block:: bash
 
-        samsift -i tests/test.bam -c 'ab=1.0*sum(QUAL)/ln'
+        samsift -i tests/test.bam -c 'ab=1.0*sum(QUAL)/len(QUAL)'
 
 
 Similar programs
