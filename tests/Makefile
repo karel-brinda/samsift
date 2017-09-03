@@ -17,13 +17,16 @@ columns: test.debug_samtools.sam test.debug_samsift.sam
 	diff $^
 
 %.debug_samtools.sam: %.bam
-	$(SV) $< > $@
+	$(SV) $< \
+		| cut -f -11 \
+		> $@
 
 %.debug_samsift.sam: %.bam
 	($(SIFT) -i $< -d '"\t".join(map(str,[QNAME, FLAG, RNAME, POS, MAPQ, CIGAR, RNEXT, PNEXT, TLEN, SEQ, QUAL]))' \
 		> /dev/null) 2>&1 \
 		| grep -v samsift \
 		| cut -f 3- \
+		| cut -f -11 \
 		> $@
 
 

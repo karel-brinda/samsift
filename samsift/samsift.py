@@ -72,7 +72,8 @@ def sam_sift(in_sam_fn, out_sam_fn, filter, code, dexpr, dtrig, mode):
 						'PNEXT': alignment.next_reference_start+1,
 						'TLEN': alignment.template_length,
 						'SEQ': alignment.query_sequence,
-						'QUAL': alignment.query_qualities,
+						'QUAL': pysam.qualities_to_qualitystring(alignment.qual, offset=0),
+						'QUALA': alignment.qual,
 						}
 				vardict.update(alignment.get_tags())
 				try:

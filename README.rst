@@ -33,7 +33,7 @@ Getting started
        # filtering: sequences containing ACCAGAGGAT
        samsift -i tests/test.bam -f 'SEQ.find("ACCAGAGGAT")!=-1'
        # tagging: add tags 'ln' with sequence length and 'ab' with average base quality
-       samsift -i tests/test.bam -c 'ln=len(SEQ);ab=1.0*sum(QUAL)/ln'
+       samsift -i tests/test.bam -c 'ln=len(SEQ);ab=1.0*sum(QUALA)/ln'
 
 
 Installation
@@ -153,7 +153,7 @@ For instance, a tag `ab` carrying the average base quality can be added by
 
 .. code-block:: bash
 
-        samsift -i tests/test.bam -c 'ab=1.0*sum(QUAL)/len(QUAL)'
+        samsift -i tests/test.bam -c 'ab=1.0*sum(QUALA)/len(QUALA)'
 
 
 Similar programs
