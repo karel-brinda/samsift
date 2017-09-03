@@ -64,7 +64,7 @@ def sam_sift(in_sam_fn, out_sam_fn, filter, code, dexpr, dtrig, mode):
 						'a': alignment,
 						'QNAME': alignment.query_name,
 						'FLAG': alignment.flag,
-						'RNAME': alignment.reference_id,
+						'RNAME': in_sam.get_reference_name(alignment.reference_id),
 						'POS': alignment.reference_start+1,
 						'MAPQ': alignment.mapping_quality,
 						'CIGAR': alignment.cigarstring,
@@ -73,6 +73,8 @@ def sam_sift(in_sam_fn, out_sam_fn, filter, code, dexpr, dtrig, mode):
 						'TLEN': alignment.template_length,
 						'SEQ': alignment.query_sequence,
 						'QUAL': pysam.qualities_to_qualitystring(alignment.qual, offset=0),
+						#
+						'RNAMEI': alignment.reference_id,
 						'QUALA': alignment.qual,
 						}
 				vardict.update(alignment.get_tags())
