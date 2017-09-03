@@ -21,10 +21,16 @@ Getting started
 
        git clone http://github.com/karel-brinda/samsift
        cd samsift
-       # keep only alignments with alignment score >94
+       # alignments with score >94, save as filtered.bam
        samsift/samsift -i tests/test.bam -o filtered.bam -f 'AS>94'
+       # only unaligned reads
+       samsift/samsift -i tests/test.bam -f 'FLAG & 0x04'
+       # only aligned reads
+       samsift/samsift -i tests/test.bam -f 'not(FLAG & 0x04)'
+       # alignments of sequences containing ACCAGAGGAT
+       samsift/samsift -i tests/test.bam -f 'SEQ.find("ACCAGAGGAT")!=-1'
        # add tags 'ln' with sequence length and 'ab' with average base quality
-       samsift/samsift -i tests/test.bam -o with_ln_ab.bam -c 'ln=len(SEQ);ab=1.0*sum(QUAL)/ln'
+       samsift/samsift -i tests/test.bam -c 'ln=len(SEQ);ab=1.0*sum(QUAL)/ln'
 
 
 Installation
@@ -63,13 +69,13 @@ Command-line parameters
 .. USAGE-BEGIN
 
 .. code-block::
-	 
+
 	Program: samsift (advanced filtering and tagging of SAM/BAM alignments using Python expressions)
 	Version: 0.1.0
 	Author:  Karel Brinda <kbrinda@hsph.harvard.edu>
-	
+
 	Usage:   samsift.py [-h] [-v] [-i FILE] [-o FILE] [-f PY_EXPR] [-c PY_CODE] [-d PY_EXPR] [-t PY_EXPR] [-m STR]
-	
+
 	Options:
 	  -h, --help            show this help message and exit
 	  -v, --version         show program's version number and exit
@@ -82,7 +88,7 @@ Command-line parameters
 	  -m STR                mode: strict (stop upon first error)
 	                              nonstop-keep (keep alignments causing errors)
 	                              nonstop-remove (remove alignments causing errors) [strict]
-	
+
 
 .. USAGE-END
 
