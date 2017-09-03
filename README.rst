@@ -21,13 +21,13 @@ Getting started
 
        git clone http://github.com/karel-brinda/samsift
        cd samsift
-       # alignments with score >94, save as filtered.bam
+       # score >94, save as filtered.bam
        samsift/samsift -i tests/test.bam -o filtered.bam -f 'AS>94'
-       # only unaligned reads
+       # unaligned reads
        samsift/samsift -i tests/test.bam -f 'FLAG & 0x04'
-       # only aligned reads
+       # aligned reads
        samsift/samsift -i tests/test.bam -f 'not(FLAG & 0x04)'
-       # alignments of sequences containing ACCAGAGGAT
+       # sequences containing ACCAGAGGAT
        samsift/samsift -i tests/test.bam -f 'SEQ.find("ACCAGAGGAT")!=-1'
        # add tags 'ln' with sequence length and 'ab' with average base quality
        samsift/samsift -i tests/test.bam -c 'ln=len(SEQ);ab=1.0*sum(QUAL)/ln'
@@ -116,7 +116,7 @@ function.
 **SAM fields.** All Python expressions and code can access variables mirroring
 all the fields from the alignment section of the `SAM specification
 <https://samtools.github.io/hts-specs/SAMv1.pdf>`_, i.e., `QNAME`, `FLAG`,
-`RNAME`, `POS` (1-based), `MAPQ`, `CIGAR` , `RNEXT`, `PNEXT`, `TLEN`, `SEQ`,
+`RNAME`, `POS` (1-based), `MAPQ`, `CIGAR`, `RNEXT`, `PNEXT`, `TLEN`, `SEQ`,
 and `QUAL`.  For instance, we can filter reads, keeping only those with `POS`
 smaller than 10000, by
 

@@ -1,7 +1,8 @@
 language: python
 os:
 - linux
-  #- osx
+#- osx
+sudo: required
 python:
 - '3.2'
 #- '3.3'
@@ -10,6 +11,7 @@ python:
 - '3.6'
 sudo: false
 install:
+- sudo apt-get install samtools
 - pip install .
 - pip install -r requirements.txt
 script:
