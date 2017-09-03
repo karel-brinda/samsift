@@ -41,6 +41,7 @@ test1:
 		| grep -E '       ' \
 		| perl -pe 's/^\s*//g' \
 		| grep -E "^samsift" \
+		| perl -pe 's@^samsift/samsift@samsift@g' \
 		| perl -pe 's@^samsift @$(SAMS) @g' \
 		>> README.sh
 	bash README.sh
