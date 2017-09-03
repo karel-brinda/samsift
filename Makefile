@@ -1,6 +1,7 @@
 .PHONY: all clean pypi test test1 test2 readme README.rst README.html inc
 
 SHELL=/usr/bin/env bash
+SAMS=./samsift/samsift.py
 
 .SECONDARY:
 
@@ -23,7 +24,7 @@ README.rst:
 	f=$$(mktemp);\
 	  sed '/USAGE-BEGIN/q' README.rst >> $$f; \
 	  printf '\n.. code-block::\n' >> $$f;\
-	  ./samsift/samsift -h 2>&1 | perl -pe 's/^(.*)$$/\t\1/g' >> $$f; \
+	  $(SAMS) -h 2>&1 | perl -pe 's/^(.*)$$/\t\1/g' >> $$f; \
 	  printf '\n' >> $$f;\
 	  sed -n '/USAGE-END/,$$ p' README.rst >> $$f;\
 	  cp $$f README.rst
@@ -35,12 +36,14 @@ inc:
 test: test1 test2
 
 test1:
+	echo "#! /usr/bin/env bash -e -x" > README.sh
 	cat README.rst \
-	     | grep -E '       ' \
-	     | perl -pe 's/^\s*//g' \
-	     | grep -E "^samsift" \
-	     | perl -pe 's/^samsift /samsift\/samsift /g' \
-	     | xargs -L 1 bash -x
+		| grep -E '       ' \
+		| perl -pe 's/^\s*//g' \
+		| grep -E "^samsift" \
+		| perl -pe 's@^samsift @$(SAMS) @g' \
+		>> README.sh
+	bash README.sh
 
 test2:
 	$(MAKE) -C tests
