@@ -235,7 +235,7 @@ def main():
 	parser.add_argument('-m',
 			choices=['strict', 'nonstop-keep', 'nonstop-remove'],
 			metavar='STR',
-			help='mode: strict (stop upon first error)\n      nonstop-keep (keep alignments causing errors)\n      nonstop-remove (remove alignments causing errors) [strict]',
+			help='mode: strict (stop on first error)\n      nonstop-keep (keep alignments causing errors)\n      nonstop-remove (remove alignments causing errors) [strict]',
 			dest='mode',
 			default='strict',
 		)

@@ -88,7 +88,7 @@ Command-line parameters
 	  -c PY_CODE            code to be executed (e.g., assigning new tags) [None]
 	  -d PY_EXPR            debugging expression to print [None]
 	  -t PY_EXPR            debugging trigger [True]
-	  -m STR                mode: strict (stop upon first error)
+	  -m STR                mode: strict (stop on first error)
 	                              nonstop-keep (keep alignments causing errors)
 	                              nonstop-remove (remove alignments causing errors) [strict]
 
@@ -113,14 +113,14 @@ Algorithm
 using the `eval <https://docs.python.org/3/library/functions.html#eval>`_
 function.
 
-**Python code.** Code is executed using the `exec
+**Python code.** The code is executed using the `exec
 <https://docs.python.org/3/library/functions.html#exec>`_ function.
 
 **SAM fields.** All Python expressions and code can access variables mirroring
 all the fields from the alignment section of the `SAM specification
 <https://samtools.github.io/hts-specs/SAMv1.pdf>`_, i.e., `QNAME`, `FLAG`,
-`RNAME`, `POS` (1-based), `MAPQ`, `CIGAR`, `RNEXT`, `PNEXT`, `TLEN`, `SEQ`,
-and `QUAL`.  For instance, we can filter reads, keeping only those with `POS`
+`RNAME`, `POS` (1-based), `MAPQ`, `CIGAR`, `RNEXT`, `PNEXT`, `TLEN`, `SEQ`, and
+`QUAL`.  For instance, we can filter reads, keeping only those with `POS`
 smaller than 10000, by
 
 .. code-block:: bash
@@ -154,6 +154,12 @@ For instance, a tag `ab` carrying the average base quality can be added by
 .. code-block:: bash
 
         samsift -i tests/test.bam -c 'ab=1.0*sum(QUALa)/len(QUALa)'
+
+**Errors.** If an error appears during evalution of an expression or execution
+a code (e.g., when accessing an undefined tag), SAMsift will either stop (`-m
+strict` which is also the default option), or continue: `-m nonstop-keep`
+ensures that the alignment causing the error will be printed, whereas with `-m
+nonstop-remove` such an alignment will be omitted.
 
 
 Similar programs
