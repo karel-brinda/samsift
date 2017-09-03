@@ -68,15 +68,19 @@ def sam_sift(in_sam_fn, out_sam_fn, filter, code, dexpr, dtrig, mode):
 						'POS': alignment.reference_start+1,
 						'MAPQ': alignment.mapping_quality,
 						'CIGAR': alignment.cigarstring,
-						'RNEXT': alignment.next_reference_id,
 						'PNEXT': alignment.next_reference_start+1,
 						'TLEN': alignment.template_length,
 						'SEQ': alignment.query_sequence,
 						'QUAL': pysam.qualities_to_qualitystring(alignment.qual, offset=0),
 						#
 						'RNAMEI': alignment.reference_id,
+						'RNEXTI': alignment.next_reference_id,
 						'QUALA': alignment.qual,
 						}
+				if vardict['RNEXTI']==-1:
+					vardict['RNEXT']='*'
+				else:
+					vardict['RNEXT']=in_sam.get_reference_name(vardict['RNEXTI']),
 				vardict.update(alignment.get_tags())
 				try:
 					passes=eval(filter, vardict)
