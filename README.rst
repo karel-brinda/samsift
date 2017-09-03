@@ -161,11 +161,14 @@ If `CODE` is provided, all two-letter variables are back-translated after its ex
 
         samsift -i tests/test.bam -c 'ab=1.0*sum(QUALa)/len(QUALa)'
 
-**Errors.** If an error appears during evalution of an expression or execution
-a code (e.g., when trying to access an undefined tag), SAMsift will either stop
-(`-m strict` which is the default option), or continue: `-m nonstop-keep`
-ensures that the alignment causing the error will be printed, whereas `-m
-nonstop-remove` leads to omitting such an alignment.
+**Errors.** If an error occurs during an evalution of an expression or an
+execution of a code (e.g., due to accessing an undefined tag), then SAMsift
+behaviour depends on the specified mode (`-m`).  With the strict mode (`-m
+strict`, default), SAMsift will immediately interrupt the computation and
+report an error.  With the `-m nonstop-keep` option, SAMsift will continue
+processing the alignments while keeping the error-causing alignments in the
+output.  With the `-m nonstop-remove` option, all error-causing alignments are
+skipped and ommited from the output.
 
 
 Similar programs
@@ -186,7 +189,7 @@ Please use `Github issues <https://github.com/karel-brinda/samsift/issues>`_.
 Changelog
 ---------
 
-See descriptions of `Releases <https://github.com/karel-brinda/samsift/releases>`_.
+See `Releases <https://github.com/karel-brinda/samsift/releases>`_.
 
 
 Licence
