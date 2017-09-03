@@ -108,24 +108,31 @@ Algorithm
                         print(ALIGNMENT)
 
 
-**Python expression.** All expressions should be valid `Python 3 expressions
-<https://docs.python.org/3/reference/expressions.html>`_. They are evaluated
+**Python expressions and code.** All expressions and code should be valid with
+respect to `Python 3 <https://docs.python.org/3/>`_. Expressions are evaluated
 using the `eval <https://docs.python.org/3/library/functions.html#eval>`_
-function.
-
-**Python code.** The code is executed using the `exec
+function and code is executed using the `exec
 <https://docs.python.org/3/library/functions.html#exec>`_ function.
 
-**SAM fields.** All Python expressions and code can access variables mirroring
-all the fields from the alignment section of the `SAM specification
-<https://samtools.github.io/hts-specs/SAMv1.pdf>`_, i.e., `QNAME`, `FLAG`,
-`RNAME`, `POS` (1-based), `MAPQ`, `CIGAR`, `RNEXT`, `PNEXT`, `TLEN`, `SEQ`, and
-`QUAL`.  For instance, we can filter reads, keeping only those with `POS`
-smaller than 10000, by
+*Example* (printing all alignments):
 
 .. code-block:: bash
 
-        samsift -i tests/test.bam -f 'POS<10000'
+        samsift -i tests/test.bam -f 'True'
+
+**SAM fields.** Expressions and code can access variables mirroring the fields
+from the alignment section of the `SAM specification
+<https://samtools.github.io/hts-specs/SAMv1.pdf>`_, i.e., `QNAME`, `FLAG`,
+`RNAME`, `POS` (1-based), `MAPQ`, `CIGAR`, `RNEXT`, `PNEXT`, `TLEN`, `SEQ`, and
+`QUAL`. In addition to them, `QUALi` stores the base qualities (an integer
+array), and `RNAMEi` and `RNEXTi` store the correspoding reference id's
+(integers).
+
+*Example* (keeping only the alignments with leftmost position <= 10000):
+
+.. code-block:: bash
+
+        samsift -i tests/test.bam -f 'POS<=10000'
 
 
 The PySAM representation of the current alignment (class `pysam.AlignedSegment
@@ -135,31 +142,30 @@ to
 
 .. code-block:: bash
 
-        samsift -i tests/test.bam -f 'a.reference_start+1<10000'
+        samsift -i tests/test.bam -f 'a.reference_start+1<=10000'
 
 
-**SAM tags.** All SAM tags are translated to variables with the same name. For
-instance, if alignment scores are provided through the `AS` tag (as defined in
-the `Sequence Alignment/Map Optional Fields Specification
-<https://samtools.github.io/hts-specs/SAMtags.pdf>`_), then alignments with
-score smaller or equal to the sequence length can be removed using
+**SAM tags.** All SAM tags are translated to variables with the same name.
+
+*Example* (removing alignments with a score smaller or equal to the sequence length):
 
 .. code-block:: bash
 
         samsift -i tests/test.bam -f 'AS>len(SEQ)'
 
-If `CODE` is provided, all two-letter variables are back-translated to tags.
-For instance, a tag `ab` carrying the average base quality can be added by
+If `CODE` is provided, all two-letter variables are back-translated after its execution to tags.
+
+*Example* (adding a tag `ab` carrying the average base quality):
 
 .. code-block:: bash
 
         samsift -i tests/test.bam -c 'ab=1.0*sum(QUALa)/len(QUALa)'
 
 **Errors.** If an error appears during evalution of an expression or execution
-a code (e.g., when accessing an undefined tag), SAMsift will either stop (`-m
-strict` which is also the default option), or continue: `-m nonstop-keep`
-ensures that the alignment causing the error will be printed, whereas with `-m
-nonstop-remove` such an alignment will be omitted.
+a code (e.g., when trying to access an undefined tag), SAMsift will either stop
+(`-m strict` which is the default option), or continue: `-m nonstop-keep`
+ensures that the alignment causing the error will be printed, whereas `-m
+nonstop-remove` leads to omitting such an alignment.
 
 
 Similar programs
@@ -169,6 +175,24 @@ Similar programs
 * `sambamba view <http://lomereiter.github.io/sambamba/docs/sambamba-view.html>`_ supports, in addition to SAMtools, filtration using `simple perl expression <https://github.com/lomereiter/sambamba/wiki/%5Bsambamba-view%5D-Filter-expression-syntax>`_. However, it's not possible to compare different tags.
 * `bamPals <https://github.com/zeeev/bamPals>`_ adds tags XB, XE, XP and XL.
 * `SamJavascript <http://lindenb.github.io/jvarkit/SamJavascript.html>`_ can filter alignments using JavaScript expressions.
+
+
+Issues
+------
+
+Please use `Github issues <https://github.com/karel-brinda/samsift/issues>`_.
+
+
+Changelog
+---------
+
+See descriptions of `Releases <https://github.com/karel-brinda/samsift/releases>`_.
+
+
+Licence
+-------
+
+`MIT <https://github.com/karel-brinda/samsift/blob/master/LICENSE>`_
 
 
 Author
