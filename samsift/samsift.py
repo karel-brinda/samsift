@@ -162,7 +162,7 @@ def main():
 			formatter_class=argparse.RawTextHelpFormatter,
 			description=
 			"Program: {} ({})\n".format(PROGRAM, DESC)+
-			"Version: {} (using pysam {})\n".format(VERSION, pysam.__version__) +
+			"Version: {}\n".format(VERSION, pysam.__version__) +
 			"Author:  Karel Brinda <kbrinda@hsph.harvard.edu>",
 			)
 	parser._optionals.title = 'Options'
