@@ -21,16 +21,17 @@ Getting started
 
        git clone http://github.com/karel-brinda/samsift
        cd samsift
-       # score >94, save as filtered.bam
-       samsift/samsift -i tests/test.bam -o filtered.bam -f 'AS>94'
-       # unaligned reads
-       samsift/samsift -i tests/test.bam -f 'FLAG & 0x04'
-       # aligned reads
-       samsift/samsift -i tests/test.bam -f 'not(FLAG & 0x04)'
-       # sequences containing ACCAGAGGAT
-       samsift/samsift -i tests/test.bam -f 'SEQ.find("ACCAGAGGAT")!=-1'
-       # add tags 'ln' with sequence length and 'ab' with average base quality
-       samsift/samsift -i tests/test.bam -c 'ln=len(SEQ);ab=1.0*sum(QUAL)/ln'
+       export PATH=$(pwd)/samsift:$PATH
+       # filter: score >94, save as filtered.bam
+       samsift -i tests/test.bam -o filtered.bam -f 'AS>94'
+       # filter: unaligned reads
+       samsift -i tests/test.bam -f 'FLAG & 0x04'
+       # filter: aligned reads
+       samsift -i tests/test.bam -f 'not(FLAG & 0x04)'
+       # filter: sequences containing ACCAGAGGAT
+       samsift -i tests/test.bam -f 'SEQ.find("ACCAGAGGAT")!=-1'
+       # annotation: add tags 'ln' with sequence length and 'ab' with average base quality
+       samsift -i tests/test.bam -c 'ln=len(SEQ);ab=1.0*sum(QUAL)/ln'
 
 
 Installation
