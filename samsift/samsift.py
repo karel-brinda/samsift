@@ -60,6 +60,7 @@ def sam_sift(in_sam_fn, out_sam_fn, filter, code, dexpr, dtrig, mode):
 			for alignment in in_sam.fetch(until_eof=True):
 				err=False
 				nt+=1
+				#print(alignment.qual)
 				vardict={
 						'a': alignment,
 						'QNAME': alignment.query_name,
@@ -71,16 +72,21 @@ def sam_sift(in_sam_fn, out_sam_fn, filter, code, dexpr, dtrig, mode):
 						'PNEXT': alignment.next_reference_start+1,
 						'TLEN': alignment.template_length,
 						'SEQ': alignment.query_sequence,
-						'QUAL': pysam.qualities_to_qualitystring(alignment.qual, offset=0),
 						#
-						'RNAMEI': alignment.reference_id,
-						'RNEXTI': alignment.next_reference_id,
-						'QUALA': alignment.qual,
+						'RNAMEi': alignment.reference_id,
+						'RNEXTi': alignment.next_reference_id,
 						}
-				if vardict['RNEXTI']==-1:
+				if isinstance(alignment.qual, str):
+					vardict['QUAL']=alignment.qual
+					vardict['QUALa']=[ord(x) for x in alignment.qual]
+				else:
+					vardict['QUAL']=pysam.qualities_to_qualitystring(alignment.qual, offset=0)
+					vardict['QUALa']=alignment.qual
+
+				if vardict['RNEXTi']==-1:
 					vardict['RNEXT']='*'
 				else:
-					vardict['RNEXT']=in_sam.get_reference_name(vardict['RNEXTI']),
+					vardict['RNEXT']=in_sam.get_reference_name(vardict['RNEXTi']),
 				vardict.update(alignment.get_tags())
 				try:
 					passes=eval(filter, vardict)
