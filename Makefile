@@ -11,6 +11,8 @@ all: readme
 clean:
 	rm -fr build/ dist/ samsift/__pycache__ samsift.egg-info
 	rm -f *.sam *.bam
+	rm -f README.html README.sh
+	$(MAKE) -C tests clean
 
 pypi:
 	/usr/bin/env python3 setup.py sdist bdist_wheel upload
@@ -27,7 +29,8 @@ README.rst:
 	  $(SAMS) -h 2>&1 | perl -pe 's/^(.*)$$/\t\1/g' >> $$f; \
 	  printf '\n' >> $$f;\
 	  sed -n '/USAGE-END/,$$ p' README.rst >> $$f;\
-	  cp $$f README.rst
+	  cat $$f \
+	  | perl -pe 's/^[\s]+$$/\n/g' > README.rst;
 
 inc:
 	./samsift/increment_version.py

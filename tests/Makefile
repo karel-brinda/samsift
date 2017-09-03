@@ -31,4 +31,4 @@ columns: test.debug_samtools.sam test.debug_samsift.sam
 
 
 clean:
-	rm -f *.sam
+	rm -f *.sam test_out.bam

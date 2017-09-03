@@ -162,14 +162,14 @@ def main():
 			formatter_class=argparse.RawTextHelpFormatter,
 			description=
 			"Program: {} ({})\n".format(PROGRAM, DESC)+
-			"Version: {}\n".format(VERSION) +
+			"Version: {} (using pysam {})\n".format(VERSION, pysam.__version__) +
 			"Author:  Karel Brinda <kbrinda@hsph.harvard.edu>",
 			)
 	parser._optionals.title = 'Options'
 
 	parser.add_argument('-v', '--version',
 			action='version',
-			version='{} {}'.format(PROGRAM, VERSION),
+			version='{} {} (using pysam {})'.format(PROGRAM, VERSION, pysam.__version__),
 			)
 
 	parser.add_argument('-i',
