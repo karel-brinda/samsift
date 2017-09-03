@@ -122,11 +122,11 @@ function and code is executed using the `exec
 
 **SAM fields.** Expressions and code can access variables mirroring the fields
 from the alignment section of the `SAM specification
-<https://samtools.github.io/hts-specs/SAMv1.pdf>`_, i.e., `QNAME`, `FLAG`,
-`RNAME`, `POS` (1-based), `MAPQ`, `CIGAR`, `RNEXT`, `PNEXT`, `TLEN`, `SEQ`, and
-`QUAL`. In addition to them, `QUALi` stores the base qualities (an integer
-array), and `RNAMEi` and `RNEXTi` store the correspoding reference id's
-(integers).
+<https://samtools.github.io/hts-specs/SAMv1.pdf>`_, i.e., ``QNAME``, ``FLAG``,
+``RNAME``, ``POS`` (1-based), ``MAPQ``, ``CIGAR``, ``RNEXT``, ``PNEXT``,
+``TLEN``, ``SEQ``, and ``QUAL``. In addition to them, ``QUALi`` stores the base
+qualities (an integer array), and ``RNAMEi`` and ``RNEXTi`` store the
+correspoding reference id's (integers).
 
 *Example* (keeping only the alignments with leftmost position <= 10000):
 
@@ -137,7 +137,7 @@ array), and `RNAMEi` and `RNEXTi` store the correspoding reference id's
 
 The PySAM representation of the current alignment (class `pysam.AlignedSegment
 <http://pysam.readthedocs.io/en/latest/api.html#pysam.AlignedSegment>`_) is
-available through the variable `a`. Therefore, the previous example is equivalent
+available through the variable ``a``. Therefore, the previous example is equivalent
 to
 
 .. code-block:: bash
@@ -153,9 +153,9 @@ to
 
         samsift -i tests/test.bam -f 'AS>len(SEQ)'
 
-If `CODE` is provided, all two-letter variables are back-translated after its execution to tags.
+If ``CODE`` is provided, all two-letter variables are back-translated after its execution to tags.
 
-*Example* (adding a tag `ab` carrying the average base quality):
+*Example* (adding a tag ``ab`` carrying the average base quality):
 
 .. code-block:: bash
 
@@ -163,12 +163,12 @@ If `CODE` is provided, all two-letter variables are back-translated after its ex
 
 **Errors.** If an error occurs during an evalution of an expression or an
 execution of a code (e.g., due to accessing an undefined tag), then SAMsift
-behaviour depends on the specified mode (`-m`).  With the strict mode (`-m
-strict`, default), SAMsift will immediately interrupt the computation and
-report an error.  With the `-m nonstop-keep` option, SAMsift will continue
+behaviour depends on the specified mode (``-m``).  With the strict mode (``-m
+strict``, default), SAMsift will immediately interrupt the computation and
+report an error.  With the ``-m nonstop-keep`` option, SAMsift will continue
 processing the alignments while keeping the error-causing alignments in the
-output.  With the `-m nonstop-remove` option, all error-causing alignments are
-skipped and ommited from the output.
+output.  With the ``-m nonstop-remove`` option, all error-causing alignments
+are skipped and ommited from the output.
 
 
 Similar programs
