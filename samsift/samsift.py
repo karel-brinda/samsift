@@ -21,6 +21,7 @@ PROGRAM='samsift'
 VERSION=version.VERSION
 DESC='advanced filtering and tagging of SAM/BAM alignments using Python expressions'
 
+BASIC_INIT="import random;"
 
 def info(msg):
 	dt = datetime.datetime.now()
@@ -31,9 +32,8 @@ def info(msg):
 def sam_sift(in_sam_fn, out_sam_fn, filter, code, dexpr, dtrig, mode, initialization):
 	info("Starting.")
 	init_vardict={}
-	if initialization is not None:
-		exec(initialization, init_vardict)
-		info("Initializing.")
+	exec(BASIC_INIT + initialization, init_vardict)
+	exec(initialization, init_vardict)
 	if in_sam_fn=='-':
 		info("Reading from standard input. " + ("Press Ctrl+D to finish reading or run '{} -h' for help.".format(PROGRAM) if in_sam_fn=="-" else""))
 

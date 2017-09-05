@@ -32,6 +32,8 @@ Getting started
        samsift -i tests/test.bam -f 'not(FLAG & 0x04)'
        # filtering: sequences containing ACCAGAGGAT
        samsift -i tests/test.bam -f 'SEQ.find("ACCAGAGGAT")!=-1'
+       # filtering: sample alignments with 25% rate
+       ./samsift/samsift.py -i tests/test.bam -f "random.random()>0.75"
        # tagging: add tags 'ln' with sequence length and 'ab' with average base quality
        samsift -i tests/test.bam -c 'ln=len(SEQ);ab=1.0*sum(QUALa)/ln'
        # tagging: add a tag 'ii' the number of the current alignment
@@ -106,6 +108,7 @@ Algorithm
 
 .. code-block:: python
 
+        exec(INITIALIZATION)
         for ALIGNMENT in ALIGNMENTS:
                 if eval(DEBUG_TRIGER):
                         print(eval(DEBUG_EXPR))
