@@ -130,7 +130,7 @@ function and code is executed using the `exec
 <https://docs.python.org/3/library/functions.html#exec>`_ function.
 Initialization can be used for importing Python modules, setting global
 variables (e.g., counters) or loading data from disk. Some modules (e.g.,
-``random``) are loaded even without an explicit request.
+``random``) are loaded without an explicit request.
 
 *Example* (printing all alignments):
 
@@ -143,9 +143,9 @@ from the alignment section of the `SAM specification
 <https://samtools.github.io/hts-specs/SAMv1.pdf>`_, i.e., ``QNAME``, ``FLAG``,
 ``RNAME``, ``POS`` (1-based), ``MAPQ``, ``CIGAR``, ``RNEXT``, ``PNEXT``,
 ``TLEN``, ``SEQ``, and ``QUAL``. Several additional variables are defined to
-simply accessign useful information: ``QUALa`` stores the base qualities as an
-integer array;  ``SEQs``, ``QUALs``, ``QUALsa`` don't include soft-clipped
-bases, and finally ``RNAMEi`` and ``RNEXTi`` store reference ids as integers.
+simply accessing some useful information: ``QUALa`` stores the base qualities
+as an integer array;  ``SEQs``, ``QUALs``, ``QUALsa`` skip soft-clipped bases;
+and ``RNAMEi`` and ``RNEXTi`` store the reference ids as integers.
 
 *Example* (keeping only the alignments with leftmost position <= 10000):
 
@@ -154,18 +154,18 @@ bases, and finally ``RNAMEi`` and ``RNEXTi`` store reference ids as integers.
         samsift -i tests/test.bam -f 'POS<=10000'
 
 
-SAMsift internally uses the `PySam <http://pysam.readthedocs.io/>`_ library.
-The representation of the current alignment (class `pysam.AlignedSegment
+SAMsift internally uses the `PySam <http://pysam.readthedocs.io/>`_ library and
+the representation of the current alignment (an instance of the class
+`pysam.AlignedSegment
 <http://pysam.readthedocs.io/en/latest/api.html#pysam.AlignedSegment>`_) is
-available through the variable ``a``. Therefore, the previous example is
-equivalent to
+available as a variable ``a``. Therefore, the previous example is equivalent to
 
 .. code-block:: bash
 
         samsift -i tests/test.bam -f 'a.reference_start+1<=10000'
 
 
-The ``a`` variable can be also used for modifying the alignment records.
+The ``a`` variable can also be used for modifying the alignment record.
 
 *Example* (removing the sequence and the bases from every record):
 
@@ -192,7 +192,7 @@ If ``CODE`` is provided, all two-letter variables are back-translated after its 
 
 **Errors.** If an error occurs during an evalution of an expression or an
 execution of a code (e.g., due to accessing an undefined tag), then SAMsift
-behaviour depends on the specified mode (``-m``).  With the strict mode (``-m
+behavior depends on the specified mode (``-m``).  With the strict mode (``-m
 strict``, default), SAMsift will immediately interrupt the computation and
 report an error.  With the ``-m nonstop-keep`` option, SAMsift will continue
 processing the alignments while keeping the error-causing alignments in the
