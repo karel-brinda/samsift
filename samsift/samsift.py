@@ -23,6 +23,7 @@ DESC='advanced filtering and tagging of SAM/BAM alignments using Python expressi
 
 BASIC_INIT="import random;"
 
+
 def info(msg):
 	dt = datetime.datetime.now()
 	fdt = dt.strftime("%Y-%m-%d %H:%M:%S")
@@ -70,23 +71,36 @@ def sam_sift(in_sam_fn, out_sam_fn, filter, code, dexpr, dtrig, mode, initializa
 						'a': alignment,
 						'QNAME': alignment.query_name,
 						'FLAG': alignment.flag,
-						'RNAME': in_sam.get_reference_name(alignment.reference_id),
+						# RNAME will be set later,
 						'POS': alignment.reference_start+1,
 						'MAPQ': alignment.mapping_quality,
 						'CIGAR': alignment.cigarstring,
+						# RNEXT will be set later,
 						'PNEXT': alignment.next_reference_start+1,
 						'TLEN': alignment.template_length,
 						'SEQ': alignment.query_sequence,
-						#
+
+						# integer id's
 						'RNAMEi': alignment.reference_id,
 						'RNEXTi': alignment.next_reference_id,
 						})
+
+				# the exact implementation depends on specific version of PySam, we want the same behaviour
 				if isinstance(alignment.qual, str):
 					vardict['QUAL']=alignment.qual
 					vardict['QUALa']=[ord(x) for x in alignment.qual]
+					vardict['QUALs']=alignment.qqual
+					vardict['QUALsa']=[ord(x) for x in alignment.qqual]
 				else:
 					vardict['QUAL']=pysam.qualities_to_qualitystring(alignment.qual, offset=0)
 					vardict['QUALa']=alignment.qual
+					vardict['QUALs']=pysam.qualities_to_qualitystring(alignment.qqual, offset=0)
+					vardict['QUALsa']=alignment.qqual
+
+				if vardict['RNAMEi']==-1:
+					vardict['RNAME']='*'
+				else:
+					vardict['RNAME']=in_sam.get_reference_name(vardict['RNAMEi']),
 
 				if vardict['RNEXTi']==-1:
 					vardict['RNEXT']='*'

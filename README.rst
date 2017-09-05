@@ -128,6 +128,9 @@ respect to `Python 3 <https://docs.python.org/3/>`_. Expressions are evaluated
 using the `eval <https://docs.python.org/3/library/functions.html#eval>`_
 function and code is executed using the `exec
 <https://docs.python.org/3/library/functions.html#exec>`_ function.
+Initialization can be used for importing Python modules, setting global
+variables (e.g., counters) or loading data from disk. Some modules (e.g.,
+``random``) are loaded even without an explicit request.
 
 *Example* (printing all alignments):
 
@@ -139,9 +142,10 @@ function and code is executed using the `exec
 from the alignment section of the `SAM specification
 <https://samtools.github.io/hts-specs/SAMv1.pdf>`_, i.e., ``QNAME``, ``FLAG``,
 ``RNAME``, ``POS`` (1-based), ``MAPQ``, ``CIGAR``, ``RNEXT``, ``PNEXT``,
-``TLEN``, ``SEQ``, and ``QUAL``. In addition to them, ``QUALi`` stores the base
-qualities (an integer array), and ``RNAMEi`` and ``RNEXTi`` store the
-correspoding reference id's (integers).
+``TLEN``, ``SEQ``, and ``QUAL``. Several additional variables are defined to
+simply accessign useful information: ``QUALa`` stores the base qualities as an
+integer array;  ``SEQs``, ``QUALs``, ``QUALsa`` don't include soft-clipped
+bases, and finally ``RNAMEi`` and ``RNEXTi`` store reference ids as integers.
 
 *Example* (keeping only the alignments with leftmost position <= 10000):
 
@@ -161,7 +165,7 @@ equivalent to
         samsift -i tests/test.bam -f 'a.reference_start+1<=10000'
 
 
-The ``a`` variable can be also used to modify the alignment record.
+The ``a`` variable can be also used for modifying the alignment records.
 
 *Example* (removing the sequence and the bases from every record):
 
