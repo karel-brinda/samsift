@@ -34,6 +34,8 @@ Getting started
        samsift -i tests/test.bam -f 'SEQ.find("ACCAGAGGAT")!=-1'
        # tagging: add tags 'ln' with sequence length and 'ab' with average base quality
        samsift -i tests/test.bam -c 'ln=len(SEQ);ab=1.0*sum(QUALa)/ln'
+       # tagging: add a tag 'ii' the number of the current alignment
+       samsift -i tests/test.bam -0 'i=0' -c 'i+=1;ii=i'
 
 
 Installation
@@ -77,7 +79,8 @@ Command-line parameters
 	Version: 0.1.0
 	Author:  Karel Brinda <kbrinda@hsph.harvard.edu>
 
-	Usage:   samsift.py [-h] [-v] [-i FILE] [-o FILE] [-f PY_EXPR] [-c PY_CODE] [-m STR] [-d PY_EXPR] [-t PY_EXPR]
+	Usage:   samsift.py [-i FILE] [-o FILE] [-f PY_EXPR] [-c PY_CODE] [-m STR] 
+	                    [-0 PY_CODE] [-d PY_EXPR] [-t PY_EXPR]
 
 	Basic options:
 	  -h, --help            show this help message and exit
@@ -91,6 +94,7 @@ Command-line parameters
 	                              nonstop-remove (remove alignments causing errors) [strict]
 
 	Advanced options:
+	  -0 PY_CODE            initialization [None]
 	  -d PY_EXPR            debugging expression to print [None]
 	  -t PY_EXPR            debugging trigger [True]
 

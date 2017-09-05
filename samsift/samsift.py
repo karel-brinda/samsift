@@ -28,10 +28,14 @@ def info(msg):
 	print("[samsift]", fdt, msg, file=sys.stderr)
 
 
-def sam_sift(in_sam_fn, out_sam_fn, filter, code, dexpr, dtrig, mode):
+def sam_sift(in_sam_fn, out_sam_fn, filter, code, dexpr, dtrig, mode, initialization):
 	info("Starting.")
+	init_vardict={}
+	if initialization is not None:
+		exec(initialization, init_vardict)
+		info("Initializing.")
 	if in_sam_fn=='-':
-		info("Reading from standard input. Press Ctrl+D to finish reading or run '{} -h' for help.".format(PROGRAM))
+		info("Reading from standard input. " + ("Press Ctrl+D to finish reading or run '{} -h' for help.".format(PROGRAM) if in_sam_fn=="-" else""))
 
 	with pysam.AlignmentFile(in_sam_fn, "rb") as in_sam: #check_sq=False)
 		#print("@PG", "ID:{}".format(PROGRAM), "PN:{}".format(PROGRAM), "VN:{}".format(VERSION), "CL:{}".format(" ".join(sys.argv)), sep="\t")
@@ -61,7 +65,8 @@ def sam_sift(in_sam_fn, out_sam_fn, filter, code, dexpr, dtrig, mode):
 				err=False
 				nt+=1
 				#print(alignment.qual)
-				vardict={
+				vardict=init_vardict
+				vardict.update({
 						'a': alignment,
 						'QNAME': alignment.query_name,
 						'FLAG': alignment.flag,
@@ -75,7 +80,7 @@ def sam_sift(in_sam_fn, out_sam_fn, filter, code, dexpr, dtrig, mode):
 						#
 						'RNAMEi': alignment.reference_id,
 						'RNEXTi': alignment.next_reference_id,
-						}
+						})
 				if isinstance(alignment.qual, str):
 					vardict['QUAL']=alignment.qual
 					vardict['QUALa']=[ord(x) for x in alignment.qual]
@@ -147,7 +152,9 @@ def main():
 				msg=msg.replace("[{x} [{x} ...]]".format(x=x), x)
 			repl=re.compile(r'\]\s+\[')
 			msg=repl.sub("] [",msg)
-			msg=msg.replace("\n  -d","\n\nAdvanced options:\n  -d")
+			msg=msg.replace("\n  -0","\n\nAdvanced options:\n  -0")
+			msg=msg.replace(" [-h] [-v]","")
+			msg=msg.replace("[-0","\n                    [-0")
 			print(msg)
 
 		def format_help(self):
@@ -223,6 +230,15 @@ def main():
 			default='strict',
 		)
 
+	parser.add_argument('-0',
+			type=str,
+			metavar='PY_CODE',
+			help='initialization [None]',
+			dest='init_l',
+			nargs='*',
+			default=['None'],
+		)
+
 	parser.add_argument('-d',
 			type=str,
 			metavar='PY_EXPR',
@@ -249,6 +265,7 @@ def main():
 			code=" ".join(args.code_l),
 			dexpr=" ".join(args.dexpr_l),
 			dtrig=" ".join(args.dtrig_l),
+			initialization=" ".join(args.init_l),
 			mode=args.mode,
 		)
 

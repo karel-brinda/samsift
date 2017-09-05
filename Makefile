@@ -1,4 +1,4 @@
-.PHONY: all clean pypi test test1 test2 readme README.rst README.html inc
+.PHONY: all clean pypi test test1 test2 readme rst html inc
 
 SHELL=/usr/bin/env bash
 SAMS=./samsift/samsift.py
@@ -17,12 +17,12 @@ clean:
 pypi:
 	/usr/bin/env python3 setup.py sdist bdist_wheel upload
 
-readme: README.rst README.html
+readme: rst html
 
-README.html:
+html:
 	rst2html.py README.rst > README.html
 
-README.rst:
+rst:
 	f=$$(mktemp);\
 	  sed '/USAGE-BEGIN/q' README.rst >> $$f; \
 	  printf '\n.. code-block::\n' >> $$f;\
