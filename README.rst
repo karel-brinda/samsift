@@ -24,6 +24,8 @@ Getting started
        cd samsift
        export PATH=$(pwd)/samsift:$PATH
 
+.. code-block::
+
        # filtering: score >94, save as filtered.bam
        samsift -i tests/test.bam -o filtered.bam -f 'AS>94'
        # filtering: unaligned reads
