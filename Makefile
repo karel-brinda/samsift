@@ -43,6 +43,7 @@ test1:
 	cat README.rst \
 		| grep -E '       ' \
 		| perl -pe 's/^\s*//g' \
+		| perl -pe 's/\s*$//g' \
 		| grep -E "^samsift" \
 		| perl -pe 's@^samsift/samsift@samsift@g' \
 		| perl -pe 's@^samsift @$(SAMS) @g' \

@@ -40,6 +40,10 @@ Getting started
        samsift -i tests/test.bam -c 'ln=len(SEQ);ab=1.0*sum(QUALa)/ln'
        # tagging: add a tag 'ii' the number of the current alignment
        samsift -i tests/test.bam -0 'i=0' -c 'i+=1;ii=i'
+       # updating: removing sequences and base qualities
+       samsift -i ./tests/test.bam -c 'a.query_sequence=""'
+       # updating: switching all reads to unaligned
+       samsift -i ./tests/test.bam -c 'a.flag|=0x4;a.reference_start=-1;a.cigarstring="";a.reference_id=-1;a.mapping_quality=0'
 
 
 Installation
