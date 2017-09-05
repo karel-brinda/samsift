@@ -30,7 +30,9 @@ rst:
 	  printf '\n' >> $$f;\
 	  sed -n '/USAGE-END/,$$ p' README.rst >> $$f;\
 	  cat $$f \
-	  | perl -pe 's/^[\s]+$$/\n/g' > README.rst;
+	  | perl -pe 's/^[\s]+$$/\n/g' \
+	  | perl -pe 's/[\s]+$$/\n/g' \
+	  > README.rst;
 
 inc:
 	./samsift/increment_version.py
@@ -43,7 +45,6 @@ test1:
 	cat README.rst \
 		| grep -E '       ' \
 		| perl -pe 's/^\s*//g' \
-		| perl -pe 's/\s*$//g' \
 		| grep -E "^samsift" \
 		| perl -pe 's@^samsift/samsift@samsift@g' \
 		| perl -pe 's@^samsift @$(SAMS) @g' \

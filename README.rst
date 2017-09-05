@@ -87,7 +87,7 @@ Command-line parameters
 	Version: 0.1.0
 	Author:  Karel Brinda <kbrinda@hsph.harvard.edu>
 
-	Usage:   samsift.py [-i FILE] [-o FILE] [-f PY_EXPR] [-c PY_CODE] [-m STR] 
+	Usage:   samsift.py [-i FILE] [-o FILE] [-f PY_EXPR] [-c PY_CODE] [-m STR]
 	                    [-0 PY_CODE] [-d PY_EXPR] [-t PY_EXPR]
 
 	Basic options:
@@ -150,17 +150,27 @@ correspoding reference id's (integers).
         samsift -i tests/test.bam -f 'POS<=10000'
 
 
-The PySAM representation of the current alignment (class `pysam.AlignedSegment
+SAMsift internally uses the `PySam <http://pysam.readthedocs.io/>`_ library.
+The representation of the current alignment (class `pysam.AlignedSegment
 <http://pysam.readthedocs.io/en/latest/api.html#pysam.AlignedSegment>`_) is
-available through the variable ``a``. Therefore, the previous example is equivalent
-to
+available through the variable ``a``. Therefore, the previous example is
+equivalent to
 
 .. code-block:: bash
 
         samsift -i tests/test.bam -f 'a.reference_start+1<=10000'
 
 
-**SAM tags.** All SAM tags are translated to variables with the same name.
+The ``a`` variable can be also used to modify the alignment record.
+
+*Example* (removing the sequence and the bases from every record):
+
+.. code-block:: bash
+
+        samsift -i ./tests/test.bam -c 'a.query_sequence=""'
+
+
+**SAM tags.** Every SAM tag is translated to a variable with the same name.
 
 *Example* (removing alignments with a score smaller or equal to the sequence length):
 
@@ -190,7 +200,7 @@ Similar programs
 ----------------
 
 * `samtools view <http://www.htslib.org/doc/samtools.html>`_ can filter alignments based on FLAGS, read group tags, and CIGAR strings.
-* `sambamba view <http://lomereiter.github.io/sambamba/docs/sambamba-view.html>`_ supports, in addition to SAMtools, filtration using `simple perl expression <https://github.com/lomereiter/sambamba/wiki/%5Bsambamba-view%5D-Filter-expression-syntax>`_. However, it's not possible to compare different tags.
+* `sambamba view <http://lomereiter.github.io/sambamba/docs/sambamba-view.html>`_ supports, in addition to SAMtools, filtration using `simple Perl expressions <https://github.com/lomereiter/sambamba/wiki/%5Bsambamba-view%5D-Filter-expression-syntax>`_. However, it's not possible to compare different tags.
 * `bamPals <https://github.com/zeeev/bamPals>`_ adds tags XB, XE, XP and XL.
 * `SamJavascript <http://lindenb.github.io/jvarkit/SamJavascript.html>`_ can filter alignments using JavaScript expressions.
 
