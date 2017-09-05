@@ -147,6 +147,7 @@ def main():
 				msg=msg.replace("[{x} [{x} ...]]".format(x=x), x)
 			repl=re.compile(r'\]\s+\[')
 			msg=repl.sub("] [",msg)
+			msg=msg.replace("\n  -d","\n\nAdvanced options:\n  -d")
 			print(msg)
 
 		def format_help(self):
@@ -171,7 +172,7 @@ def main():
 			"Version: {}\n".format(VERSION, pysam.__version__) +
 			"Author:  Karel Brinda <kbrinda@hsph.harvard.edu>",
 			)
-	parser._optionals.title = 'Options'
+	parser._optionals.title = 'Basic options'
 
 	parser.add_argument('-v', '--version',
 			action='version',
@@ -214,6 +215,14 @@ def main():
 			default=['None'],
 			)
 
+	parser.add_argument('-m',
+			choices=['strict', 'nonstop-keep', 'nonstop-remove'],
+			metavar='STR',
+			help='mode: strict (stop on first error)\n      nonstop-keep (keep alignments causing errors)\n      nonstop-remove (remove alignments causing errors) [strict]',
+			dest='mode',
+			default='strict',
+		)
+
 	parser.add_argument('-d',
 			type=str,
 			metavar='PY_EXPR',
@@ -231,15 +240,6 @@ def main():
 			nargs='*',
 			default=["True"],
 		)
-
-	parser.add_argument('-m',
-			choices=['strict', 'nonstop-keep', 'nonstop-remove'],
-			metavar='STR',
-			help='mode: strict (stop on first error)\n      nonstop-keep (keep alignments causing errors)\n      nonstop-remove (remove alignments causing errors) [strict]',
-			dest='mode',
-			default='strict',
-		)
-
 	args = parser.parse_args()
 
 	sam_sift(
