@@ -24,13 +24,13 @@ Getting started
        cd samsift
        export PATH=$(pwd)/samsift:$PATH
 
-       # filtering: score >94, save as filtered.bam
+       # filtering: keep only alignments with score >94, save them as filtered.bam
        samsift -i tests/test.bam -o filtered.bam -f 'AS>94'
-       # filtering: unaligned reads
+       # filtering: keep only unaligned reads
        samsift -i tests/test.bam -f 'FLAG & 0x04'
-       # filtering: aligned reads
+       # filtering: keep only aligned reads
        samsift -i tests/test.bam -f 'not(FLAG & 0x04)'
-       # filtering: sequences containing ACCAGAGGAT
+       # filtering: keep only sequences containing ACCAGAGGAT
        samsift -i tests/test.bam -f 'SEQ.find("ACCAGAGGAT")!=-1'
        # filtering: sample alignments with 25% rate
        samsift -i tests/test.bam -f 'random.random()<0.25'
@@ -84,7 +84,7 @@ Command-line parameters
 .. code-block::
 
 	Program: samsift (advanced filtering and tagging of SAM/BAM alignments using Python expressions)
-	Version: 0.1.0
+	Version: 0.2.0
 	Author:  Karel Brinda <kbrinda@hsph.harvard.edu>
 
 	Usage:   samsift.py [-i FILE] [-o FILE] [-f PY_EXPR] [-c PY_CODE] [-m STR]
@@ -165,7 +165,7 @@ available as a variable ``a``. Therefore, the previous example is equivalent to
         samsift -i tests/test.bam -f 'a.reference_start+1<=10000'
 
 
-The ``a`` variable can also be used for modifying the alignment record.
+The ``a`` variable can also be used for modifying the current alignment record.
 
 *Example* (removing the sequence and the bases from every record):
 
