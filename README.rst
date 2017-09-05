@@ -33,9 +33,9 @@ Getting started
        # filtering: sequences containing ACCAGAGGAT
        samsift -i tests/test.bam -f 'SEQ.find("ACCAGAGGAT")!=-1'
        # filtering: sample alignments with 25% rate
-       samsift -i tests/test.bam -f 'random.random()>0.75'
+       samsift -i tests/test.bam -f 'random.random()<0.25'
        # filtering: sample alignments with 25% rate with a fixed RNG seed
-       samsift -i tests/test.bam -f 'random.random()>0.75' -0 'random.seed(42)'
+       samsift -i tests/test.bam -f 'random.random()<0.25' -0 'random.seed(42)'
        # tagging: add tags 'ln' with sequence length and 'ab' with average base quality
        samsift -i tests/test.bam -c 'ln=len(SEQ);ab=1.0*sum(QUALa)/ln'
        # tagging: add a tag 'ii' the number of the current alignment
