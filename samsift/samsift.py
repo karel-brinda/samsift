@@ -124,7 +124,11 @@ def sam_sift(in_sam_fn, out_sam_fn, filter, code, dexpr, dtrig, mode, initializa
 				if dexpr != "":
 					trig=eval(str(dtrig), vardict)
 					if trig:
-						dbg_res=eval(dexpr, vardict)
+						try:
+							dbg_res=eval(dexpr, vardict)
+						except:
+							# todo: add a better message
+							dbg_res="evaluation_failed"
 						print(alignment.query_name, bool(passes), dbg_res, file=sys.stderr, sep="\t")
 				if passes:
 					if code is not None:
