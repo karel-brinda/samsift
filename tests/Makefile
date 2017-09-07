@@ -1,4 +1,4 @@
-.PHONY: all clean basic columns
+.PHONY: all clean basic columns id
 
 SHELL=/usr/bin/env bash -euc -o pipefail
 
@@ -7,11 +7,15 @@ SHELL=/usr/bin/env bash -euc -o pipefail
 SIFT=../samsift/samsift.py
 SV=samtools view
 
-all: basic columns
+all: basic columns id
 
 basic:
 	$(SIFT) -i test.bam -c 'ln=len(SEQ);ab=sum(a.query_qualities)/ln'
 	$(SIFT) -i test.bam -o test_out.bam -c 'ln=len(SEQ);ab=sum(a.query_qualities)/ln'
+
+id:
+	$(SIFT) -i test.bam | grep -v samsift > _test.sam
+	diff test.sam _test.sam
 
 columns: test.debug_samtools.sam test.debug_samsift.sam
 	diff $^
