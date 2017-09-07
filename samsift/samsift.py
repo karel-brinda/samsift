@@ -106,6 +106,15 @@ def sam_sift(in_sam_fn, out_sam_fn, filter, code, dexpr, dtrig, mode, initializa
 					vardict['RNEXT']='*'
 				else:
 					vardict['RNEXT']=in_sam.get_reference_name(vardict['RNEXTi'])
+
+				# clean cache
+				keys_to_delete=[]
+				for k in vardict:
+					if len(k)==2:
+						keys_to_delete.append(k)
+				for k in keys_to_delete:
+					del vardict[k]
+
 				vardict.update(alignment.get_tags())
 				try:
 					passes=eval(filter, vardict)
@@ -124,7 +133,11 @@ def sam_sift(in_sam_fn, out_sam_fn, filter, code, dexpr, dtrig, mode, initializa
 				if dexpr != "":
 					trig=eval(str(dtrig), vardict)
 					if trig:
-						dbg_res=eval(dexpr, vardict)
+						try:
+							dbg_res=eval(dexpr, vardict)
+						except:
+							# todo: add a better message
+							dbg_res="evaluation_failed"
 						print(alignment.query_name, bool(passes), dbg_res, file=sys.stderr, sep="\t")
 				if passes:
 					if code is not None:
