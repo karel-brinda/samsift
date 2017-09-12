@@ -22,7 +22,7 @@ VERSION=version.VERSION
 DESC='normalize SAM in order to faciliate SAM files comparison'
 
 
-def sam_norm(in_sam_fn, out_sam_fn, skip_headers):
+def sam_norm(in_sam_fn, out_sam_fn, skip_headers, ignored_tags):
     if in_sam_fn[-4:]==".bam":
         in_mode="rb"
     else:
@@ -43,23 +43,22 @@ def sam_norm(in_sam_fn, out_sam_fn, skip_headers):
 
             for alignment in in_sam.fetch(until_eof=True):
 
-                #print("alignment", alignment.qname)
-
                 if alignment.qname!=qname and len(buffer_alignments):
-                    buffer_alignments.sort(key=lambda x: x.reference_id)
+                    buffer_alignments.sort()
                     for x in buffer_alignments:
-                        out_sam.write(alignment)
+                        out_sam.write(x)
                     buffer_alignments=[]
 
-                qname=alignment.qname
+                qname=alignment.qname[:]
 
                 tags=alignment.get_tags()
+                tags=list(filter(lambda x: x[0] not in ignored_tags, tags))
                 tags.sort()
                 alignment.set_tags(tags)
 
                 buffer_alignments.append(alignment)
 
-            buffer_alignments.sort(key=lambda x: x.reference_id)
+            buffer_alignments.sort()
             for alignment in buffer_alignments:
                 out_sam.write(alignment)
                 buffer_alignments=[]
@@ -124,8 +123,16 @@ def main():
             required=False,
             )
 
+    parser.add_argument('-T',
+            help="ignored tags",
+            dest='ignored_tags',
+            metavar='TAG',
+            nargs='*',
+            default=[],
+            )
+
     parser.add_argument('-H',
-            help="skip headers",
+            help="skip SAM headers",
             dest='skip_headers',
             action='store_true',
             )
@@ -136,6 +143,7 @@ def main():
             in_sam_fn=args.in_sam_fn,
             out_sam_fn=args.out_sam_fn,
             skip_headers=args.skip_headers,
+            ignored_tags=args.ignored_tags,
         )
 
 
