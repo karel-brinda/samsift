@@ -5,6 +5,7 @@ SHELL=/usr/bin/env bash -euc -o pipefail
 .SECONDARY:
 
 SIFT=../samsift/samsift.py
+NORM=../samsift/samsift_norm_sam.py -H
 SV=samtools view
 
 all: basic columns id
@@ -15,7 +16,7 @@ basic:
 
 id:
 	$(SIFT) -i test.bam | grep -v samsift > _test.sam
-	diff test.sam _test.sam
+	diff <($(NORM) -i test.sam) <($(NORM) -i _test.sam)
 
 columns: test.debug_samtools.sam test.debug_samsift.sam
 	diff $^
