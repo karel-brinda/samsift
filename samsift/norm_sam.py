@@ -22,7 +22,7 @@ VERSION=version.VERSION
 DESC='normalize SAM in order to faciliate SAM files comparison'
 
 
-def sam_norm(in_sam_fn, out_sam_fn):
+def sam_norm(in_sam_fn, out_sam_fn, skip_headers):
     if in_sam_fn[-4:]==".bam":
         in_mode="rb"
     else:
@@ -36,11 +36,10 @@ def sam_norm(in_sam_fn, out_sam_fn):
     with pysam.AlignmentFile(in_sam_fn, in_mode) as in_sam: #check_sq=False)
         header=in_sam.header
 
-
         buffer_alignments=[]
         qname=None
 
-        with pysam.AlignmentFile(out_sam_fn, out_mode, header=header) as out_sam:
+        with pysam.AlignmentFile(out_sam_fn, out_mode, header=header, add_sam_header=not skip_headers) as out_sam:
 
             for alignment in in_sam.fetch(until_eof=True):
 
@@ -125,11 +124,18 @@ def main():
             required=False,
             )
 
+    parser.add_argument('-H',
+            help="skip headers",
+            dest='skip_headers',
+            action='store_true',
+            )
+
     args = parser.parse_args()
 
     sam_norm(
             in_sam_fn=args.in_sam_fn,
             out_sam_fn=args.out_sam_fn,
+            skip_headers=args.skip_headers,
         )
 
 
