@@ -5,7 +5,7 @@ SHELL=/usr/bin/env bash -euc -o pipefail
 .SECONDARY:
 
 SIFT=../samsift/samsift.py
-NORM=../samsift/samsift.py
+NORM=../samsift/samsift_norm_sam.py -H
 SV=samtools view
 
 all: basic columns id
