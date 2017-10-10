@@ -3,8 +3,8 @@
 SF=../../samsift/samsift.py
 
 SHELL=/usr/bin/env bash -euc -o pipefail
-BAM=test.bam
-SMALLBAM=test.small.bam
+BAM=_test.bam
+SMALLBAM=_test.small.bam
 
 .SECONDARY:
 

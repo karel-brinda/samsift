@@ -2,6 +2,8 @@ README.html
 README.sh
 *.sam
 *.bam
+!test.sam
+!test.bam
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
