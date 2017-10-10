@@ -32,25 +32,36 @@ def info(msg):
 
 class SamSift:
 
-    def __init__(self, sam_header, out_sam_fn, filter, code, dexpr, dtrig, mode, initialization):
-        self.sam_header=sam_header
-        self.output_sam_fn
+    def __init__(self, in_sam_fn, out_sam_fn, filter, code, dexpr, dtrig, mode, initialization):
+        self.in_sam_fn=in_sam_fn
+        self.out_sam_fn=out_sam_fn
+
         self.filter=filter
         self.code=code
         self.dexpr=dexpr
         self.dtrig=dtrig
-        self.mode=mode
         self.initialization=initialization
+
+        self.mode=mode
+
 
         self.nt=0
         self.np=0
         self.nf=0
         self.ne=0
 
-        info("Starting.")
+        if in_sam_fn=='-':
+            info("Reading from standard input. " + ("Press Ctrl+D to finish reading or run '{} -h' for help.".format(PROGRAM) if in_sam_fn=="-" else""))
+
+        if self.out_sam_fn[-4:]==".bam":
+            self.pysam_out_mode="wb"
+        else:
+            self.pysam_out_mode="w"
+
         self.init_vardict={}
         exec(BASIC_INIT + initialization, self.init_vardict)
         exec(self.initialization, self.init_vardict)
+
 
     def _init_alignment(self, alignment):
         self.alignment=alignment
@@ -90,15 +101,15 @@ class SamSift:
             self.vardict['QUALs']=pysam.qualities_to_qualitystring(alignment.qqual, offset=0)
             self.vardict['QUALsa']=alignment.qqual
 
-        if vardict['RNAMEi']==-1:
+        if self.vardict['RNAMEi']==-1:
             self.vardict['RNAME']='*'
         else:
-            self.vardict['RNAME']=self.in_sam.get_reference_name(vardict['RNAMEi'])
+            self.vardict['RNAME']=self.in_sam.get_reference_name(self.vardict['RNAMEi'])
 
-        if vardict['RNEXTi']==-1:
+        if self.vardict['RNEXTi']==-1:
             self.vardict['RNEXT']='*'
         else:
-            self.vardict['RNEXT']=self.in_sam.get_reference_name(vardict['RNEXTi'])
+            self.vardict['RNEXT']=self.in_sam.get_reference_name(self.vardict['RNEXTi'])
 
         # clean cache
         keys_to_delete=[]
@@ -110,32 +121,35 @@ class SamSift:
 
         self.vardict.update(alignment.get_tags())
 
+
     def _filter(self):
         try:
-            passes=eval(filter, vardict)
+            self.passes=eval(self.filter, self.vardict)
         except:
             self.err=True
-            if mode=="strict":
+            if self.mode=="strict":
                 raise
-            elif mode=="nonstop-keep":
+            elif self.mode=="nonstop-keep":
                 self.passes=True
                 self.ne+=1
-            elif mode=="nonstop-remove":
-                sefl.passes=False
+            elif self.mode=="nonstop-remove":
+                self.passes=False
                 self.ne+=1
             else:
                 raise NotImplementedError
 
+
     def _debug(self):
         if self.dexpr != "":
-            trig=eval(str(dtrig), vardict)
+            trig=eval(str(self.dtrig), self.vardict)
             if trig:
                 try:
-                    dbg_res=eval(dexpr, vardict)
+                    dbg_res=eval(self.dexpr, self.vardict)
                 except:
                     # todo: add a better message
                     dbg_res="evaluation_failed"
-                print(alignment.query_name, bool(passes), dbg_res, file=sys.stderr, sep="\t")
+                print(self.alignment.query_name, bool(self.passes), dbg_res, file=sys.stderr, sep="\t")
+
 
     def _code(self):
         if self.code is not None:
@@ -150,7 +164,7 @@ class SamSift:
                     self.err=True
                     info("Alignment '{}' - code error ('{}')".format(self.alignment.query_name, sys.exc_info()[0]))
 
-            for k, v in vardict.items():
+            for k, v in self.vardict.items():
                 if len(k)==2:
                     if isinstance(v, float):
                         # workaround (see "https://github.com/pysam-developers/pysam/issues/531")
@@ -159,16 +173,20 @@ class SamSift:
                         self.alignment.set_tag(k, v)
 
 
+    def _print_alignment(self):
+        self.out_sam.write(self.alignment)
+
+
+
     def process_alignment(self, alignment):
         self._init_alignment(alignment)
 
-
-        (err, passes)=self._filter()
-        self._debug(alignment)
+        self._filter()
+        self._debug()
  
-        if passes:
+        if self.passes:
             self._code()
-            out_sam.write(alignment)
+            self._print_alignment()
             if not self.err:
                 self.np+=1
         else:
@@ -176,37 +194,30 @@ class SamSift:
                 self.nf+=1
 
 
-def sam_sift(in_sam_fn, out_sam_fn, filter, code, dexpr, dtrig, mode, initialization):
-    if in_sam_fn=='-':
-        info("Reading from standard input. " + ("Press Ctrl+D to finish reading or run '{} -h' for help.".format(PROGRAM) if in_sam_fn=="-" else""))
+    def run(self):
+        info("SAMsift is starting.")
+        with pysam.AlignmentFile(self.in_sam_fn, "rb") as in_sam: #check_sq=False)
+            self.in_sam=in_sam
+            #print("@PG", "ID:{}".format(PROGRAM), "PN:{}".format(PROGRAM), "VN:{}".format(VERSION), "CL:{}".format(" ".join(sys.argv)), sep="\t")
+            header=in_sam.header
 
-    with pysam.AlignmentFile(in_sam_fn, "rb") as in_sam: #check_sq=False)
-        #print("@PG", "ID:{}".format(PROGRAM), "PN:{}".format(PROGRAM), "VN:{}".format(VERSION), "CL:{}".format(" ".join(sys.argv)), sep="\t")
-        header=in_sam.header
+            pg={
+                    "ID":PROGRAM,
+                    "PN":PROGRAM,
+                    "VN":VERSION,
+                    "CL":" ".join(map(lambda x:"'{}'".format(x),sys.argv)),
+                }
 
-        pg={
-                "ID":PROGRAM,
-                "PN":PROGRAM,
-                "VN":VERSION,
-                "CL":" ".join(map(lambda x:"'{}'".format(x),sys.argv)),
-            }
+            try:
+                header['PG'].insert(0,pg)
+            except KeyError:
+                header['PG']=[pg]
 
-        try:
-            header['PG'].insert(0,pg)
-        except KeyError:
-            header['PG']=[pg]
-
-        if out_sam_fn[-4:]==".bam":
-            out_mode="wb"
-        else:
-            out_mode="w"
-
-        with pysam.AlignmentFile(out_sam_fn, out_mode, header=header) as out_sam:
-            for alignment in in_sam.fetch(until_eof=True):
-                self.process_alignment(alignment)
-
-    info("Finishing. {} alignments processed. {} alignments passed. {} alignments filtered out. {} alignments caused errors.".format(self.nt, self.np, self.nf, self.ne))
-
+            with pysam.AlignmentFile(self.out_sam_fn, self.pysam_out_mode, header=header) as out_sam:
+                self.out_sam=out_sam
+                for alignment in in_sam.fetch(until_eof=True):
+                    self.process_alignment(alignment)
+        info("Finishing. {} alignments processed. {} alignments passed. {} alignments filtered out. {} alignments caused errors.".format(self.nt, self.np, self.nf, self.ne))
 
 
 def parse_args():
@@ -325,11 +336,12 @@ def parse_args():
             default=["True"],
         )
     args = parser.parse_args()
+    return args
 
 
 def main ():
     args=parse_args()
-    sam_sift(
+    sam_sift=SamSift(
             in_sam_fn=args.in_sam_fn,
             out_sam_fn=args.out_sam_fn,
             filter=" ".join(args.filter_l),
@@ -339,6 +351,7 @@ def main ():
             initialization=" ".join(args.init_l),
             mode=args.mode,
         )
+    sam_sift.run()
 
 
 if __name__ == "__main__":
