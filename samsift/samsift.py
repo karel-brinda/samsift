@@ -149,6 +149,8 @@ class SamSift:
 
 
     def _init_alignment(self, alignment):
+        """Init context for the alignment.
+        """
         self.alignment=alignment
 
         self.err=False
@@ -170,6 +172,12 @@ class SamSift:
 
 
     def _filter(self):
+        """Evaluate FILTER.
+        """
+        if self.filter=="":
+            self.passes=True
+            return
+
         try:
             self.passes=eval(self.filter, self.vardict)
         except:
@@ -187,42 +195,51 @@ class SamSift:
 
 
     def _debug(self):
-        if self.dexpr != "":
-            trig=eval(str(self.dtrig), self.vardict)
-            if trig:
-                try:
-                    dbg_res=eval(self.dexpr, self.vardict)
-                except Exception as e:
-                    # todo: add a better message
-                    dbg_res="evaluation_failed ({})".format(e)
-                print(self.alignment.query_name, bool(self.passes), dbg_res, file=sys.stderr, sep="\t")
+        """eval(DEBUG_TRIGER) & print(eval(DEBUG_EXPR))
+        """
+        if self.dexpr=="":
+            return
+
+        trig=eval(str(self.dtrig), self.vardict) if self.dtrig!="" else True
+        if trig:
+            try:
+                dbg_res=eval(self.dexpr, self.vardict)
+            except Exception as e:
+                # todo: add a better message
+                dbg_res="evaluation_failed ({})".format(e)
+            print(self.alignment.query_name, bool(self.passes), dbg_res, file=sys.stderr, sep="\t")
 
 
     def _code(self):
-        if self.code is not None:
-            try:
-                exec(self.code, self.vardict)
-            except:
-                if self.mode=="strict":
-                    raise
-                else:
-                    if self.err==False:
-                        self.ne+=1
-                    self.err=True
-                    info("Alignment '{}' - code error ('{}')".format(self.alignment.query_name, sys.exc_info()[0]))
+        """exec(CODE)
+        """
+        if self.code=="":
+            return
 
-            for k, v in self.vardict.items():
-                if len(k)==2:
-                    if isinstance(v, float):
-                        # workaround (see "https://github.com/pysam-developers/pysam/issues/531")
-                        self.alignment.set_tag(k, v, value_type="f")
-                    else:
-                        self.alignment.set_tag(k, v)
+        # 1. exec(CODE)
+        try:
+            exec(self.code, self.vardict)
+        except:
+            if self.mode=="strict":
+                raise
+            else:
+                if self.err==False:
+                    self.ne+=1
+                self.err=True
+                info("Alignment '{}' - code error ('{}')".format(self.alignment.query_name, sys.exc_info()[0]))
+
+        # 2. backpropagate tags
+        for k, v in self.vardict.items():
+            if len(k)==2:
+                if isinstance(v, float):
+                    # workaround (see "https://github.com/pysam-developers/pysam/issues/531")
+                    self.alignment.set_tag(k, v, value_type="f")
+                else:
+                    self.alignment.set_tag(k, v)
 
 
     def _print_alignment(self):
         self.out_sam.write(self.alignment)
-
 
 
     def process_alignment(self, alignment):
@@ -336,7 +353,7 @@ def parse_args():
             help='filter [True]',
             dest='filter_l',
             nargs='*',
-            default=['True'],
+            default=[],
             )
 
     parser.add_argument('-c',
@@ -345,7 +362,7 @@ def parse_args():
             help="code to be executed (e.g., assigning new tags) [None]",
             dest='code_l',
             nargs='*',
-            default=['None'],
+            default=[],
             )
 
     parser.add_argument('-m',
@@ -362,7 +379,7 @@ def parse_args():
             help='initialization [None]',
             dest='init_l',
             nargs='*',
-            default=['None'],
+            default=[],
         )
 
     parser.add_argument('-d',
@@ -380,7 +397,7 @@ def parse_args():
             help='debugging trigger [True]',
             dest='dtrig_l',
             nargs='*',
-            default=["True"],
+            default=[],
         )
     args = parser.parse_args()
     return args
