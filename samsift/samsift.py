@@ -24,10 +24,22 @@ DESC='advanced filtering and tagging of SAM/BAM alignments using Python expressi
 BASIC_INIT="import random;"
 
 
+ALIGNMENT_VARIABLE_NAMES=set([
+        'a',
+        'QNAME', 'FLAG', 'POS', 'MAPQ', 'CIGAR', 'PNEXT', 'TLEN', 'SEQ',
+        'RNAMEi', 'RNEXTi',
+        'QUAL', 'QUALa', 'QUALs', 'QUALsa', 'QUAL', 'QUALa', 'QUALs', 'QUALsa',
+    ])
+
 def info(msg):
     dt = datetime.datetime.now()
     fdt = dt.strftime("%Y-%m-%d %H:%M:%S")
     print("[samsift]", fdt, msg, file=sys.stderr)
+
+
+def possible_vars(string):
+    f=filter(lambda x: string.find(x)!=-1, ALIGNMENT_VARIABLE_NAMES)
+    return set(f)
 
 
 class SamSift:
@@ -58,9 +70,78 @@ class SamSift:
         else:
             self.pysam_out_mode="w"
 
+        self.filter_possible_vars=possible_vars(self.filter)
+        self.code_possible_vars=possible_vars(self.code)
+        self.possible_vars = self.filter_possible_vars | self.code_possible_vars
+
         self.init_vardict={}
         exec(BASIC_INIT + initialization, self.init_vardict)
         exec(self.initialization, self.init_vardict)
+
+
+    def _init_vardict(self, alignment):
+        """Init the variable dictionary (context for eval/code exec).
+
+        Tricks:
+            - init only those variable that appear as a substring
+        """
+
+        self.vardict=self.init_vardict
+
+        if 'a' in self.possible_vars:
+            self.vardict['a'] = alignment
+        if 'QNAME' in self.possible_vars:
+            self.vardict['QNAME'] = alignment.query_name
+        if 'FLAG' in self.possible_vars:
+            self.vardict['FLAG'] = alignment.flag
+        if 'POS' in self.possible_vars:
+            self.vardict['POS'] = alignment.reference_start+1
+        if 'MAPQ' in self.possible_vars:
+            self.vardict['MAPQ'] = alignment.mapping_quality
+        if 'CIGAR' in self.possible_vars:
+            self.vardict['CIGAR'] = alignment.cigarstring
+        if 'PNEXT' in self.possible_vars:
+            self.vardict['PNEXT'] = alignment.next_reference_start+1
+        if 'TLEN' in self.possible_vars:
+            self.vardict['TLEN'] = alignment.template_length
+        if 'SEQ' in self.possible_vars:
+            self.vardict['SEQ'] = alignment.query_sequence
+        if 'RNAMEi' in self.possible_vars:
+            self.vardict['RNAMEi'] = alignment.reference_id
+        if 'RNEXTi' in self.possible_vars:
+            self.vardict['RNEXTi'] = alignment.next_reference_id
+
+        # the specific implementation depends on the specific version of PySam, we want the same behaviour
+        if isinstance(alignment.qual, str):
+            if 'QUAL' in self.possible_vars:
+                self.vardict['QUAL']=alignment.qual
+            if 'QUALa' in self.possible_vars:
+                self.vardict['QUALa']=[ord(x) for x in alignment.qual]
+            if 'QUALs' in self.possible_vars:
+                self.vardict['QUALs']=alignment.qqual
+            if 'QUALsa' in self.possible_vars:
+                self.vardict['QUALsa']=[ord(x) for x in alignment.qqual]
+        else:
+            if 'QUAL' in self.possible_vars:
+                self.vardict['QUAL']=pysam.qualities_to_qualitystring(alignment.qual, offset=0)
+            if 'QUALa' in self.possible_vars:
+                self.vardict['QUALa']=alignment.qual
+            if 'QUALs' in self.possible_vars:
+                self.vardict['QUALs']=pysam.qualities_to_qualitystring(alignment.qqual, offset=0)
+            if 'QUALsa' in self.possible_vars:
+                self.vardict['QUALsa']=alignment.qqual
+
+        if 'RNAME' in self.possible_vars:
+            if alignment.reference_id==-1:
+                self.vardict['RNAME']='*'
+            else:
+                self.vardict['RNAME']=self.in_sam.get_reference_name(alignment.reference_id)
+
+        if 'RNEXT' in self.possible_vars:
+            if alignment.next_reference_id==-1:
+                self.vardict['RNEXT']='*'
+            else:
+                self.vardict['RNEXT']=self.in_sam.get_reference_name(alignment.next_reference_id)
 
 
     def _init_alignment(self, alignment):
@@ -69,49 +150,10 @@ class SamSift:
         self.err=False
         self.nt+=1
 
-        #print(alignment.qual)
-        self.vardict=self.init_vardict
-        self.vardict.update({
-                'a': alignment,
-                'QNAME': alignment.query_name,
-                'FLAG': alignment.flag,
-                # RNAME will be set later,
-                'POS': alignment.reference_start+1,
-                'MAPQ': alignment.mapping_quality,
-                'CIGAR': alignment.cigarstring,
-                # RNEXT will be set later,
-                'PNEXT': alignment.next_reference_start+1,
-                'TLEN': alignment.template_length,
-                'SEQ': alignment.query_sequence,
+        # 1. init variable dictionary
+        self._init_vardict()
 
-                # integer id's
-                'RNAMEi': alignment.reference_id,
-                'RNEXTi': alignment.next_reference_id,
-                })
-
-        # the specific implementation depends on the specific version of PySam, we want the same behaviour
-        if isinstance(alignment.qual, str):
-            self.vardict['QUAL']=alignment.qual
-            self.vardict['QUALa']=[ord(x) for x in alignment.qual]
-            self.vardict['QUALs']=alignment.qqual
-            self.vardict['QUALsa']=[ord(x) for x in alignment.qqual]
-        else:
-            self.vardict['QUAL']=pysam.qualities_to_qualitystring(alignment.qual, offset=0)
-            self.vardict['QUALa']=alignment.qual
-            self.vardict['QUALs']=pysam.qualities_to_qualitystring(alignment.qqual, offset=0)
-            self.vardict['QUALsa']=alignment.qqual
-
-        if self.vardict['RNAMEi']==-1:
-            self.vardict['RNAME']='*'
-        else:
-            self.vardict['RNAME']=self.in_sam.get_reference_name(self.vardict['RNAMEi'])
-
-        if self.vardict['RNEXTi']==-1:
-            self.vardict['RNEXT']='*'
-        else:
-            self.vardict['RNEXT']=self.in_sam.get_reference_name(self.vardict['RNEXTi'])
-
-        # clean cache
+        # 2. remove old tags
         keys_to_delete=[]
         for k in self.vardict:
             if len(k)==2:
@@ -119,6 +161,7 @@ class SamSift:
         for k in keys_to_delete:
             del self.vardict[k]
 
+        # 3. load tags
         self.vardict.update(alignment.get_tags())
 
 
@@ -183,7 +226,7 @@ class SamSift:
 
         self._filter()
         self._debug()
- 
+
         if self.passes:
             self._code()
             self._print_alignment()
