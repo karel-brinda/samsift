@@ -1,4 +1,4 @@
-.PHONY: all clean pypi test test1 test2 readme rst html inc
+.PHONY: all clean pypi test test1 test2 readme rst html inc wpypi wconda
 
 SHELL=/usr/bin/env bash
 SAMS=./samsift/samsift.py
@@ -55,3 +55,10 @@ test1:
 
 test2:
 	$(MAKE) -C tests
+
+wconda:
+	open https://bioconda.github.io/recipes/samsift/README.html
+
+wpypi:
+	open https://pypi.python.org/pypi/samsift
+
