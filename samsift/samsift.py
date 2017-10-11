@@ -27,7 +27,7 @@ BASIC_INIT="import random;"
 ALIGNMENT_VARIABLE_NAMES=set([
         'a',
         'QNAME', 'FLAG', 'POS', 'MAPQ', 'CIGAR', 'PNEXT', 'TLEN', 'SEQ',
-        'RNAMEi', 'RNEXTi',
+        'RNAME', 'RNAMEi', 'RNEXT', 'RNEXTi',
         'QUAL', 'QUALa', 'QUALs', 'QUALsa', 'QUAL', 'QUALa', 'QUALs', 'QUALsa',
     ])
 
@@ -72,14 +72,16 @@ class SamSift:
 
         self.filter_possible_vars=possible_vars(self.filter)
         self.code_possible_vars=possible_vars(self.code)
-        self.possible_vars = self.filter_possible_vars | self.code_possible_vars
+        self.debug_possible_vars=possible_vars(self.dexpr) | possible_vars(self.dtrig)
+        self.possible_vars = self.filter_possible_vars | self.code_possible_vars | self.debug_possible_vars
+        #info(self.possible_vars)
 
         self.init_vardict={}
         exec(BASIC_INIT + initialization, self.init_vardict)
         exec(self.initialization, self.init_vardict)
 
 
-    def _init_vardict(self, alignment):
+    def _init_vardict(self):
         """Init the variable dictionary (context for eval/code exec).
 
         Tricks:
@@ -87,6 +89,8 @@ class SamSift:
         """
 
         self.vardict=self.init_vardict
+
+        alignment=self.alignment
 
         if 'a' in self.possible_vars:
             self.vardict['a'] = alignment
@@ -188,9 +192,9 @@ class SamSift:
             if trig:
                 try:
                     dbg_res=eval(self.dexpr, self.vardict)
-                except:
+                except Exception as e:
                     # todo: add a better message
-                    dbg_res="evaluation_failed"
+                    dbg_res="evaluation_failed ({})".format(e)
                 print(self.alignment.query_name, bool(self.passes), dbg_res, file=sys.stderr, sep="\t")
 
 
