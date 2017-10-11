@@ -5,7 +5,7 @@ SAMS=./samsift/samsift.py
 
 .SECONDARY:
 
-all: readme tests/test.bam
+all: readme tests/tests/test.bam
 
 clean:
 	rm -fr build/ dist/ samsift/__pycache__ samsift.egg-info
@@ -16,7 +16,7 @@ clean:
 pypi:
 	/usr/bin/env python3 setup.py sdist bdist_wheel upload
 
-tests/test.bam: tests/test.sam
+tests/tests/test.bam: tests/tests/test.sam
 	samtools view -b "$<" > "$@"
 
 readme: rst html

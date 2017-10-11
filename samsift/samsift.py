@@ -24,151 +24,267 @@ DESC='advanced filtering and tagging of SAM/BAM alignments using Python expressi
 BASIC_INIT="import random;"
 
 
+ALIGNMENT_VARIABLE_NAMES=set([
+        'a',
+        'QNAME', 'FLAG', 'POS', 'MAPQ', 'CIGAR', 'PNEXT', 'TLEN', 'SEQ',
+        'RNAME', 'RNAMEi', 'RNEXT', 'RNEXTi',
+        'QUAL', 'QUALa', 'QUALs', 'QUALsa', 'QUAL', 'QUALa', 'QUALs', 'QUALsa',
+    ])
+
 def info(msg):
     dt = datetime.datetime.now()
     fdt = dt.strftime("%Y-%m-%d %H:%M:%S")
     print("[samsift]", fdt, msg, file=sys.stderr)
 
 
-def sam_sift(in_sam_fn, out_sam_fn, filter, code, dexpr, dtrig, mode, initialization):
-    info("Starting.")
-    init_vardict={}
-    exec(BASIC_INIT + initialization, init_vardict)
-    exec(initialization, init_vardict)
-    if in_sam_fn=='-':
-        info("Reading from standard input. " + ("Press Ctrl+D to finish reading or run '{} -h' for help.".format(PROGRAM) if in_sam_fn=="-" else""))
+def possible_vars(string):
+    f=filter(lambda x: string.find(x)!=-1, ALIGNMENT_VARIABLE_NAMES)
+    return set(f)
 
-    with pysam.AlignmentFile(in_sam_fn, "rb") as in_sam: #check_sq=False)
-        #print("@PG", "ID:{}".format(PROGRAM), "PN:{}".format(PROGRAM), "VN:{}".format(VERSION), "CL:{}".format(" ".join(sys.argv)), sep="\t")
-        header=in_sam.header
 
-        pg={
-                "ID":PROGRAM,
-                "PN":PROGRAM,
-                "VN":VERSION,
-                "CL":" ".join(map(lambda x:"'{}'".format(x),sys.argv)),
-            }
+class SamSift:
+
+    def __init__(self, in_sam_fn, out_sam_fn, filter, code, dexpr, dtrig, mode, initialization):
+        self.in_sam_fn=in_sam_fn
+        self.out_sam_fn=out_sam_fn
+
+        self.filter=filter
+        self.code=code
+        self.dexpr=dexpr
+        self.dtrig=dtrig
+        self.initialization=initialization
+
+        self.mode=mode
+
+
+        self.nt=0
+        self.np=0
+        self.nf=0
+        self.ne=0
+
+        if in_sam_fn=='-':
+            info("Reading from standard input. " + ("Press Ctrl+D to finish reading or run '{} -h' for help.".format(PROGRAM) if in_sam_fn=="-" else""))
+
+        if self.out_sam_fn[-4:]==".bam":
+            self.pysam_out_mode="wb"
+        else:
+            self.pysam_out_mode="w"
+
+        self.filter_possible_vars=possible_vars(self.filter)
+        self.code_possible_vars=possible_vars(self.code)
+        self.debug_possible_vars=possible_vars(self.dexpr) | possible_vars(self.dtrig)
+        self.possible_vars = self.filter_possible_vars | self.code_possible_vars | self.debug_possible_vars
+        #info(self.possible_vars)
+
+        self.init_vardict={}
+        exec(BASIC_INIT + initialization, self.init_vardict)
+        exec(self.initialization, self.init_vardict)
+
+
+    def _init_vardict(self):
+        """Init the variable dictionary (context for eval/code exec).
+
+        Tricks:
+            - init only those variable that appear as a substring
+        """
+
+        self.vardict=self.init_vardict
+
+        alignment=self.alignment
+
+        if 'a' in self.possible_vars:
+            self.vardict['a'] = alignment
+        if 'QNAME' in self.possible_vars:
+            self.vardict['QNAME'] = alignment.query_name
+        if 'FLAG' in self.possible_vars:
+            self.vardict['FLAG'] = alignment.flag
+        if 'POS' in self.possible_vars:
+            self.vardict['POS'] = alignment.reference_start+1
+        if 'MAPQ' in self.possible_vars:
+            self.vardict['MAPQ'] = alignment.mapping_quality
+        if 'CIGAR' in self.possible_vars:
+            self.vardict['CIGAR'] = alignment.cigarstring
+        if 'PNEXT' in self.possible_vars:
+            self.vardict['PNEXT'] = alignment.next_reference_start+1
+        if 'TLEN' in self.possible_vars:
+            self.vardict['TLEN'] = alignment.template_length
+        if 'SEQ' in self.possible_vars:
+            self.vardict['SEQ'] = alignment.query_sequence
+        if 'RNAMEi' in self.possible_vars:
+            self.vardict['RNAMEi'] = alignment.reference_id
+        if 'RNEXTi' in self.possible_vars:
+            self.vardict['RNEXTi'] = alignment.next_reference_id
+
+        # the specific implementation depends on the specific version of PySam, we want the same behaviour
+        if isinstance(alignment.qual, str):
+            if 'QUAL' in self.possible_vars:
+                self.vardict['QUAL']=alignment.qual
+            if 'QUALa' in self.possible_vars:
+                self.vardict['QUALa']=[ord(x) for x in alignment.qual]
+            if 'QUALs' in self.possible_vars:
+                self.vardict['QUALs']=alignment.qqual
+            if 'QUALsa' in self.possible_vars:
+                self.vardict['QUALsa']=[ord(x) for x in alignment.qqual]
+        else:
+            if 'QUAL' in self.possible_vars:
+                self.vardict['QUAL']=pysam.qualities_to_qualitystring(alignment.qual, offset=0)
+            if 'QUALa' in self.possible_vars:
+                self.vardict['QUALa']=alignment.qual
+            if 'QUALs' in self.possible_vars:
+                self.vardict['QUALs']=pysam.qualities_to_qualitystring(alignment.qqual, offset=0)
+            if 'QUALsa' in self.possible_vars:
+                self.vardict['QUALsa']=alignment.qqual
+
+        if 'RNAME' in self.possible_vars:
+            if alignment.reference_id==-1:
+                self.vardict['RNAME']='*'
+            else:
+                self.vardict['RNAME']=self.in_sam.get_reference_name(alignment.reference_id)
+
+        if 'RNEXT' in self.possible_vars:
+            if alignment.next_reference_id==-1:
+                self.vardict['RNEXT']='*'
+            else:
+                self.vardict['RNEXT']=self.in_sam.get_reference_name(alignment.next_reference_id)
+
+
+    def _init_alignment(self, alignment):
+        """Init context for the alignment.
+        """
+        self.alignment=alignment
+
+        self.err=False
+        self.nt+=1
+
+        # 1. init variable dictionary
+        self._init_vardict()
+
+        # 2. remove old tags
+        keys_to_delete=[]
+        for k in self.vardict:
+            if len(k)==2:
+                keys_to_delete.append(k)
+        for k in keys_to_delete:
+            del self.vardict[k]
+
+        # 3. load tags
+        self.vardict.update(alignment.get_tags())
+
+
+    def _filter(self):
+        """Evaluate FILTER.
+        """
+        if self.filter=="":
+            self.passes=True
+            return
 
         try:
-            header['PG'].insert(0,pg)
-        except KeyError:
-            header['PG']=[pg]
+            self.passes=eval(self.filter, self.vardict)
+        except:
+            self.err=True
+            if self.mode=="strict":
+                raise
+            elif self.mode=="nonstop-keep":
+                self.passes=True
+                self.ne+=1
+            elif self.mode=="nonstop-remove":
+                self.passes=False
+                self.ne+=1
+            else:
+                raise NotImplementedError
 
-        if out_sam_fn[-4:]==".bam":
-            out_mode="wb"
+
+    def _debug(self):
+        """eval(DEBUG_TRIGER) & print(eval(DEBUG_EXPR))
+        """
+        if self.dexpr=="":
+            return
+
+        trig=eval(str(self.dtrig), self.vardict) if self.dtrig!="" else True
+        if trig:
+            try:
+                dbg_res=eval(self.dexpr, self.vardict)
+            except Exception as e:
+                # todo: add a better message
+                dbg_res="evaluation_failed ({})".format(e)
+            print(self.alignment.query_name, bool(self.passes), dbg_res, file=sys.stderr, sep="\t")
+
+
+    def _code(self):
+        """exec(CODE)
+        """
+        if self.code=="":
+            return
+
+        # 1. exec(CODE)
+        try:
+            exec(self.code, self.vardict)
+        except:
+            if self.mode=="strict":
+                raise
+            else:
+                if self.err==False:
+                    self.ne+=1
+                self.err=True
+                info("Alignment '{}' - code error ('{}')".format(self.alignment.query_name, sys.exc_info()[0]))
+
+        # 2. backpropagate tags
+        for k, v in self.vardict.items():
+            if len(k)==2:
+                if isinstance(v, float):
+                    # workaround (see "https://github.com/pysam-developers/pysam/issues/531")
+                    self.alignment.set_tag(k, v, value_type="f")
+                else:
+                    self.alignment.set_tag(k, v)
+
+
+    def _print_alignment(self):
+        self.out_sam.write(self.alignment)
+
+
+    def process_alignment(self, alignment):
+        self._init_alignment(alignment)
+
+        self._filter()
+        self._debug()
+
+        if self.passes:
+            self._code()
+            self._print_alignment()
+            if not self.err:
+                self.np+=1
         else:
-            out_mode="w"
-
-        with pysam.AlignmentFile(out_sam_fn, out_mode, header=header) as out_sam:
-
-            nt,np,nf,ne=0,0,0,0
-            for alignment in in_sam.fetch(until_eof=True):
-                err=False
-                nt+=1
-                #print(alignment.qual)
-                vardict=init_vardict
-                vardict.update({
-                        'a': alignment,
-                        'QNAME': alignment.query_name,
-                        'FLAG': alignment.flag,
-                        # RNAME will be set later,
-                        'POS': alignment.reference_start+1,
-                        'MAPQ': alignment.mapping_quality,
-                        'CIGAR': alignment.cigarstring,
-                        # RNEXT will be set later,
-                        'PNEXT': alignment.next_reference_start+1,
-                        'TLEN': alignment.template_length,
-                        'SEQ': alignment.query_sequence,
-
-                        # integer id's
-                        'RNAMEi': alignment.reference_id,
-                        'RNEXTi': alignment.next_reference_id,
-                        })
-
-                # the exact implementation depends on specific version of PySam, we want the same behaviour
-                if isinstance(alignment.qual, str):
-                    vardict['QUAL']=alignment.qual
-                    vardict['QUALa']=[ord(x) for x in alignment.qual]
-                    vardict['QUALs']=alignment.qqual
-                    vardict['QUALsa']=[ord(x) for x in alignment.qqual]
-                else:
-                    vardict['QUAL']=pysam.qualities_to_qualitystring(alignment.qual, offset=0)
-                    vardict['QUALa']=alignment.qual
-                    vardict['QUALs']=pysam.qualities_to_qualitystring(alignment.qqual, offset=0)
-                    vardict['QUALsa']=alignment.qqual
-
-                if vardict['RNAMEi']==-1:
-                    vardict['RNAME']='*'
-                else:
-                    vardict['RNAME']=in_sam.get_reference_name(vardict['RNAMEi'])
-
-                if vardict['RNEXTi']==-1:
-                    vardict['RNEXT']='*'
-                else:
-                    vardict['RNEXT']=in_sam.get_reference_name(vardict['RNEXTi'])
-
-                # clean cache
-                keys_to_delete=[]
-                for k in vardict:
-                    if len(k)==2:
-                        keys_to_delete.append(k)
-                for k in keys_to_delete:
-                    del vardict[k]
-
-                vardict.update(alignment.get_tags())
-                try:
-                    passes=eval(filter, vardict)
-                except:
-                    err=True
-                    if mode=="strict":
-                        raise
-                    elif mode=="nonstop-keep":
-                        passes=True
-                        ne+=1
-                    elif mode=="nonstop-remove":
-                        passes=False
-                        ne+=1
-                    else:
-                        raise NotImplementedError
-                if dexpr != "":
-                    trig=eval(str(dtrig), vardict)
-                    if trig:
-                        try:
-                            dbg_res=eval(dexpr, vardict)
-                        except:
-                            # todo: add a better message
-                            dbg_res="evaluation_failed"
-                        print(alignment.query_name, bool(passes), dbg_res, file=sys.stderr, sep="\t")
-                if passes:
-                    if code is not None:
-                        try:
-                            exec(code, vardict)
-                        except:
-                            if mode=="strict":
-                                raise
-                            else:
-                                if err==False:
-                                    ne+=1
-                                err=True
-                                info("Alignment '{}' - code error ('{}')".format(alignment.query_name, sys.exc_info()[0]))
+            if not self.err:
+                self.nf+=1
 
 
-                        for k, v in vardict.items():
-                            if len(k)==2:
-                                if isinstance(v, float):
-                                    # workaround (see "https://github.com/pysam-developers/pysam/issues/531")
-                                    alignment.set_tag(k, v, value_type="f")
-                                else:
-                                    alignment.set_tag(k, v)
-                    out_sam.write(alignment)
-                    if not err:
-                        np+=1
-                else:
-                    if not err:
-                        nf+=1
-    info("Finishing. {} alignments processed. {} alignments passed. {} alignments filtered out. {} alignments caused errors.".format(nt, np, nf, ne))
+    def run(self):
+        info("SAMsift is starting.")
+        with pysam.AlignmentFile(self.in_sam_fn, "rb") as in_sam: #check_sq=False)
+            self.in_sam=in_sam
+            #print("@PG", "ID:{}".format(PROGRAM), "PN:{}".format(PROGRAM), "VN:{}".format(VERSION), "CL:{}".format(" ".join(sys.argv)), sep="\t")
+            header=in_sam.header
 
-def main():
+            pg={
+                    "ID":PROGRAM,
+                    "PN":PROGRAM,
+                    "VN":VERSION,
+                    "CL":" ".join(map(lambda x:"'{}'".format(x),sys.argv)),
+                }
+
+            try:
+                header['PG'].insert(0,pg)
+            except KeyError:
+                header['PG']=[pg]
+
+            with pysam.AlignmentFile(self.out_sam_fn, self.pysam_out_mode, header=header) as out_sam:
+                self.out_sam=out_sam
+                for alignment in in_sam.fetch(until_eof=True):
+                    self.process_alignment(alignment)
+        info("Finishing. {} alignments processed. {} alignments passed. {} alignments filtered out. {} alignments caused errors.".format(self.nt, self.np, self.nf, self.ne))
+
+
+def parse_args():
 
     class CustomArgumentParser (argparse.ArgumentParser):
         def print_help(self):
@@ -237,7 +353,7 @@ def main():
             help='filter [True]',
             dest='filter_l',
             nargs='*',
-            default=['True'],
+            default=[],
             )
 
     parser.add_argument('-c',
@@ -246,7 +362,7 @@ def main():
             help="code to be executed (e.g., assigning new tags) [None]",
             dest='code_l',
             nargs='*',
-            default=['None'],
+            default=[],
             )
 
     parser.add_argument('-m',
@@ -263,7 +379,7 @@ def main():
             help='initialization [None]',
             dest='init_l',
             nargs='*',
-            default=['None'],
+            default=[],
         )
 
     parser.add_argument('-d',
@@ -281,11 +397,15 @@ def main():
             help='debugging trigger [True]',
             dest='dtrig_l',
             nargs='*',
-            default=["True"],
+            default=[],
         )
     args = parser.parse_args()
+    return args
 
-    sam_sift(
+
+def main ():
+    args=parse_args()
+    sam_sift=SamSift(
             in_sam_fn=args.in_sam_fn,
             out_sam_fn=args.out_sam_fn,
             filter=" ".join(args.filter_l),
@@ -295,6 +415,7 @@ def main():
             initialization=" ".join(args.init_l),
             mode=args.mode,
         )
+    sam_sift.run()
 
 
 if __name__ == "__main__":
