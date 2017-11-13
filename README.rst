@@ -98,7 +98,7 @@ Command-line parameters
 	  -v, --version         show program's version number and exit
 	  -i FILE               input SAM/BAM file [-]
 	  -o FILE               output SAM/BAM file [-]
-	  -f PY_EXPR            filter [True]
+	  -f PY_EXPR            filtering expression [True]
 	  -c PY_CODE            code to be executed (e.g., assigning new tags) [None]
 	  -m STR                mode: strict (stop on first error)
 	                              nonstop-keep (keep alignments causing errors)

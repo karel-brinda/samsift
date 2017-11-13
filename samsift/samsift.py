@@ -350,7 +350,7 @@ def parse_args():
     parser.add_argument('-f',
             type=str,
             metavar='PY_EXPR',
-            help='filter [True]',
+            help='filtering expression [True]',
             dest='filter_l',
             nargs='*',
             default=[],
