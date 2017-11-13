@@ -1,4 +1,4 @@
-.PHONY: all clean pypi test test1 test2 readme rst html inc wpypi wconda
+.PHONY: all clean pypi test test1 test2 readme rst html inc wpypi wconda sha256
 
 SHELL=/usr/bin/env bash
 SAMS=./samsift/samsift.py
@@ -61,4 +61,7 @@ wconda:
 
 wpypi:
 	open https://pypi.python.org/pypi/samsift
+
+sha256:
+	s=$$(curl https://pypi.python.org/pypi/samsift  2>/dev/null| perl -pe 's/#/\n/g' | grep -o 'https.*\.tar\.gz' | xargs curl -L 2>/dev/null | shasum -a 256 | awk '{print $$1;}'); echo $$s; echo $$s | pbcopy
 
