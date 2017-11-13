@@ -9,6 +9,9 @@ SAMsift
 
 .. image:: https://badge.fury.io/py/samsift.svg
         :target: https://badge.fury.io/py/samsift
+	
+.. image:: https://zenodo.org/badge/DOI/10.5281/zenodo.1048211.svg
+        :target: https://doi.org/10.5281/zenodo.1048211
 
 SAMsift is a program for advanced filtering and tagging of SAM/BAM alignments
 using Python expressions.
