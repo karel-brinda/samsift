@@ -9,7 +9,7 @@ SAMsift
 
 .. image:: https://badge.fury.io/py/samsift.svg
         :target: https://badge.fury.io/py/samsift
-	
+
 .. image:: https://zenodo.org/badge/DOI/10.5281/zenodo.1048211.svg
         :target: https://doi.org/10.5281/zenodo.1048211
 
@@ -207,7 +207,8 @@ Similar programs
 ----------------
 
 * `samtools view <http://www.htslib.org/doc/samtools.html>`_ can filter alignments based on FLAGS, read group tags, and CIGAR strings.
-* `sambamba view <http://lomereiter.github.io/sambamba/docs/sambamba-view.html>`_ supports, in addition to SAMtools, filtration using `simple Perl expressions <https://github.com/lomereiter/sambamba/wiki/%5Bsambamba-view%5D-Filter-expression-syntax>`_. However, it's not possible to use floats or compare different tags.
+* `sambamba view <http://lomereiter.github.io/sambamba/docs/sambamba-view.html>`_ supports, in addition to SAMtools, a filtration using `simple Perl-like expressions <https://github.com/lomereiter/sambamba/wiki/%5Bsambamba-view%5D-Filter-expression-syntax>`_. However, it is not possible to use floats or compare different tags.
+* `BamQL <https://github.com/BoutrosLaboratory/bamql>` provides a simple query language for filtering SAM/BAM files.
 * `bamPals <https://github.com/zeeev/bamPals>`_ adds tags XB, XE, XP and XL.
 * `SamJavascript <http://lindenb.github.io/jvarkit/SamJavascript.html>`_ can filter alignments using JavaScript expressions.
 
