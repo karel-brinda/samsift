@@ -38,7 +38,7 @@ Getting started
        samsift -i tests/test.bam -f 'random.random()<0.25' -0 'random.seed(42)'
        # tagging: add tags 'ln' with sequence length and 'ab' with average base quality
        samsift -i tests/test.bam -c 'ln=len(SEQ);ab=1.0*sum(QUALa)/ln'
-       # tagging: add a tag 'ii' the number of the current alignment
+       # tagging: add a tag 'ii' with the number of the current alignment
        samsift -i tests/test.bam -0 'i=0' -c 'i+=1;ii=i'
        # updating: removing sequences and base qualities
        samsift -i ./tests/test.bam -c 'a.query_sequence=""'
