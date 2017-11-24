@@ -44,9 +44,9 @@ Getting started
        # tagging: add a tag 'ii' with the number of the current alignment
        samsift -i tests/test.bam -0 'i=0' -c 'i+=1;ii=i'
        # updating: removing sequences and base qualities
-       samsift -i ./tests/test.bam -c 'a.query_sequence=""'
+       samsift -i tests/test.bam -c 'a.query_sequence=""'
        # updating: switching all reads to unaligned
-       samsift -i ./tests/test.bam -c 'a.flag|=0x4;a.reference_start=-1;a.cigarstring="";a.reference_id=-1;a.mapping_quality=0'
+       samsift -i tests/test.bam -c 'a.flag|=0x4;a.reference_start=-1;a.cigarstring="";a.reference_id=-1;a.mapping_quality=0'
 
 
 Installation
