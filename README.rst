@@ -174,7 +174,7 @@ The ``a`` variable can also be used for modifying the current alignment record.
 
 .. code-block:: bash
 
-        samsift -i ./tests/test.bam -c 'a.query_sequence=""'
+        samsift -i tests/test.bam -c 'a.query_sequence=""'
 
 
 **SAM tags.** Every SAM tag is translated to a variable with the same name.
