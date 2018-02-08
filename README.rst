@@ -35,6 +35,8 @@ Getting started
        samsift -i tests/test.bam -f 'not(FLAG & 0x04)'
        # filtering: keep only sequences containing ACCAGAGGAT
        samsift -i tests/test.bam -f 'SEQ.find("ACCAGAGGAT")!=-1'
+       # filtering: keep only sequences containing A and T only (defined using regular expressions)
+       samsift -i tests/test.bam -f 're.match(r"^[AT]*$", SEQ)'
        # filtering: sample alignments with 25% rate
        samsift -i tests/test.bam -f 'random.random()<0.25'
        # filtering: sample alignments with 25% rate with a fixed RNG seed
