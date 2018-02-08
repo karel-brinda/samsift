@@ -2,10 +2,10 @@ SAMsift
 =======
 
 .. image:: https://travis-ci.org/karel-brinda/samsift.svg?branch=master
-	:target: https://travis-ci.org/karel-brinda/samsift
+        :target: https://travis-ci.org/karel-brinda/samsift
 
 .. image:: https://img.shields.io/badge/install%20with-bioconda-brightgreen.svg?style=flat-square
-	:target: https://anaconda.org/bioconda/samsift
+        :target: https://anaconda.org/bioconda/samsift
 
 .. image:: https://badge.fury.io/py/samsift.svg
         :target: https://badge.fury.io/py/samsift
@@ -136,8 +136,8 @@ using the `eval <https://docs.python.org/3/library/functions.html#eval>`_
 function and code is executed using the `exec
 <https://docs.python.org/3/library/functions.html#exec>`_ function.
 Initialization can be used for importing Python modules, setting global
-variables (e.g., counters) or loading data from disk. Some modules (e.g.,
-``random``) are loaded without an explicit request.
+variables (e.g., counters) or loading data from disk. Some modules (namely
+``random`` and ``re``) are loaded without an explicit request.
 
 *Example* (printing all alignments):
 
@@ -189,7 +189,8 @@ The ``a`` variable can also be used for modifying the current alignment record.
 
         samsift -i tests/test.bam -f 'AS>len(SEQ)'
 
-If ``CODE`` is provided, all two-letter variables are back-translated after its execution to tags.
+If ``CODE`` is provided, all two-letter variables except ``re`` (the Python regex
+module) are back-translated to tags after the code execution.
 
 *Example* (adding a tag ``ab`` carrying the average base quality):
 
