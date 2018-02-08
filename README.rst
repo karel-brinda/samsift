@@ -213,6 +213,7 @@ Similar programs
 * `BamQL <https://github.com/BoutrosLaboratory/bamql>`_ provides a simple query language for filtering SAM/BAM files.
 * `bamPals <https://github.com/zeeev/bamPals>`_ adds tags XB, XE, XP and XL.
 * `SamJavascript <http://lindenb.github.io/jvarkit/SamJavascript.html>`_ can filter alignments using JavaScript expressions.
+* `Picard FilterSamReads <https://broadinstitute.github.io/picard/command-line-overview.html#FilterSamReads>`_ can also filter alignments using JavaScript expressions.
 
 
 Issues
