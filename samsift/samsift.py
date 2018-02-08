@@ -230,7 +230,7 @@ class SamSift:
 
         # 2. backpropagate tags
         for k, v in self.vardict.items():
-            if len(k)==2:
+            if len(k)==2 and k!='re':
                 if isinstance(v, float):
                     # workaround (see "https://github.com/pysam-developers/pysam/issues/531")
                     self.alignment.set_tag(k, v, value_type="f")
