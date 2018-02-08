@@ -21,7 +21,7 @@ PROGRAM='samsift'
 VERSION=version.VERSION
 DESC='advanced filtering and tagging of SAM/BAM alignments using Python expressions'
 
-BASIC_INIT="import random;"
+BASIC_INIT="import random;import re;"
 
 
 ALIGNMENT_VARIABLE_NAMES=set([
@@ -162,7 +162,7 @@ class SamSift:
         # 2. remove old tags
         keys_to_delete=[]
         for k in self.vardict:
-            if len(k)==2:
+            if len(k)==2 and k!='re':
                 keys_to_delete.append(k)
         for k in keys_to_delete:
             del self.vardict[k]
