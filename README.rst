@@ -39,6 +39,8 @@ Getting started
        samsift -i tests/test.bam -f 'random.random()<0.25'
        # filtering: sample alignments with 25% rate with a fixed RNG seed
        samsift -i tests/test.bam -f 'random.random()<0.25' -0 'random.seed(42)'
+       # filtering: keep only alignments of reads specified in tests/qnames.txt
+       samsift -i tests/test.bam -0 'q=open("tests/qnames.txt").read().splitlines()' -f 'QNAME in q'
        # tagging: add tags 'ln' with sequence length and 'ab' with average base quality
        samsift -i tests/test.bam -c 'ln=len(SEQ);ab=1.0*sum(QUALa)/ln'
        # tagging: add a tag 'ii' with the number of the current alignment
