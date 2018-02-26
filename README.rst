@@ -43,6 +43,8 @@ Getting started
        samsift -i tests/test.bam -f 'random.random()<0.25' -0 'random.seed(42)'
        # filtering: keep only alignments of reads specified in tests/qnames.txt
        samsift -i tests/test.bam -0 'q=open("tests/qnames.txt").read().splitlines()' -f 'QNAME in q'
+       # filtering: keep only first 5000 reads from chr1 and 5000 reads from chr2
+       samsift -i tests/test.bam -0 'c={"chr1":5000,"chr2":5000}' -f 'c[RNAME]>0' -c 'c[RNAME]-=1' -m nonstop-remove
        # tagging: add tags 'ln' with sequence length and 'ab' with average base quality
        samsift -i tests/test.bam -c 'ln=len(SEQ);ab=1.0*sum(QUALa)/ln'
        # tagging: add a tag 'ii' with the number of the current alignment
@@ -91,7 +93,7 @@ Command-line parameters
 .. code-block::
 
 	Program: samsift (advanced filtering and tagging of SAM/BAM alignments using Python expressions)
-	Version: 0.2.4
+	Version: 0.2.5
 	Author:  Karel Brinda <kbrinda@hsph.harvard.edu>
 
 	Usage:   samsift.py [-i FILE] [-o FILE] [-f PY_EXPR] [-c PY_CODE] [-m STR]
