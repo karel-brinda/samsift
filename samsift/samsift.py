@@ -265,17 +265,17 @@ class SamSift:
             #print("@PG", "ID:{}".format(PROGRAM), "PN:{}".format(PROGRAM), "VN:{}".format(VERSION), "CL:{}".format(" ".join(sys.argv)), sep="\t")
             header=in_sam.header
 
-            pg={
-                    "ID":PROGRAM,
-                    "PN":PROGRAM,
-                    "VN":VERSION,
-                    "CL":" ".join(map(lambda x:"'{}'".format(x),sys.argv)),
-                }
+            #pg={
+            #        "ID":PROGRAM,
+            #        "PN":PROGRAM,
+            #        "VN":VERSION,
+            #        "CL":" ".join(map(lambda x:"'{}'".format(x),sys.argv)),
+            #    }
 
-            try:
-                header['PG'].insert(0,pg)
-            except KeyError:
-                header['PG']=[pg]
+            #try:
+            #    header['PG'].insert(0,pg)
+            #except KeyError:
+            #    header['PG']=[pg]
 
             with pysam.AlignmentFile(self.out_sam_fn, self.pysam_out_mode, header=header) as out_sam:
                 self.out_sam=out_sam
