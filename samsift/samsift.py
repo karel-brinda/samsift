@@ -258,29 +258,43 @@ class SamSift:
                 self.nf+=1
 
 
+    def _process_input(self, in_sam):
+        """Shared code for processing alignments, factored out to avoid duplication"""
+        self.in_sam=in_sam
+        header=in_sam.header
+
+        #print("@PG", "ID:{}".format(PROGRAM), "PN:{}".format(PROGRAM), "VN:{}".format(VERSION), "CL:{}".format(" ".join(sys.argv)), sep="\t")
+        #pg={
+        #        "ID":PROGRAM,
+        #        "PN":PROGRAM,
+        #        "VN":VERSION,
+        #        "CL":" ".join(map(lambda x:"'{}'".format(x),sys.argv)),
+        #    }
+        #try:
+        #    header['PG'].insert(0,pg)
+        #except KeyError:
+        #    header['PG']=[pg]
+
+        with pysam.AlignmentFile(self.out_sam_fn, self.pysam_out_mode, header=header) as out_sam:
+            self.out_sam=out_sam
+            for alignment in in_sam.fetch(until_eof=True):
+                self.process_alignment(alignment)
+
+
     def run(self):
         info("SAMsift is starting.")
-        with pysam.AlignmentFile(self.in_sam_fn, "rb") as in_sam: #check_sq=False)
-            self.in_sam=in_sam
-            #print("@PG", "ID:{}".format(PROGRAM), "PN:{}".format(PROGRAM), "VN:{}".format(VERSION), "CL:{}".format(" ".join(sys.argv)), sep="\t")
-            header=in_sam.header
-
-            #pg={
-            #        "ID":PROGRAM,
-            #        "PN":PROGRAM,
-            #        "VN":VERSION,
-            #        "CL":" ".join(map(lambda x:"'{}'".format(x),sys.argv)),
-            #    }
-
-            #try:
-            #    header['PG'].insert(0,pg)
-            #except KeyError:
-            #    header['PG']=[pg]
-
-            with pysam.AlignmentFile(self.out_sam_fn, self.pysam_out_mode, header=header) as out_sam:
-                self.out_sam=out_sam
-                for alignment in in_sam.fetch(until_eof=True):
-                    self.process_alignment(alignment)
+        try:
+            # first attempt: open normally
+            with pysam.AlignmentFile(self.in_sam_fn, "rb") as in_sam: #check_sq=False)
+                self._process_input(in_sam)
+        except ValueError as e:
+            # fallback for missing @SQ lines
+            if "file has no sequences defined" in str(e):
+                info("Warning: input file has no @SQ header lines. Reopening with check_sq=False.")
+                with pysam.AlignmentFile(self.in_sam_fn, "rb", check_sq=False) as in_sam:
+                    self._process_input(in_sam)
+            else:
+                raise
         info("Finishing. {} alignments processed. {} alignments passed. {} alignments filtered out. {} alignments caused errors.".format(self.nt, self.np, self.nf, self.ne))
 
 

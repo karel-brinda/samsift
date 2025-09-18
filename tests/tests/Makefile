@@ -1,4 +1,4 @@
-.PHONY: all clean basic columns id
+.PHONY: all clean basic columns id seqheadless
 
 SHELL=/usr/bin/env bash -euc -o pipefail
 
@@ -8,7 +8,7 @@ SIFT=../../samsift/samsift.py
 NORM=../../samsift/samsift_norm_sam.py -H
 SV=samtools view
 
-all: basic columns id
+all: basic columns id seqheadless
 
 basic:
 	$(SIFT) -i test.bam -c 'ln=len(SEQ);ab=sum(a.query_qualities)/ln'
@@ -18,6 +18,8 @@ id:
 	$(SIFT) -i test.bam | grep -v samsift > _test.sam
 	diff <($(NORM) -i test.sam) <($(NORM) -i _test.sam)
 
+seqheadless:
+	$(SIFT) -i seqheadless.bam
 columns: _test.debug_samtools.sam _test.debug_samsift.sam
 	diff $^
 
