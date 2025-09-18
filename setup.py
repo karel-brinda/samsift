@@ -31,21 +31,19 @@ setuptools.setup(
         'Programming Language :: Python :: 3 :: Only',
         'Operating System :: Unix',
         'Environment :: Console',
-        'License :: OSI Approved :: MIT License',
         'Intended Audience :: Science/Research',
         'Topic :: Scientific/Engineering :: Bio-Informatics',
     ],
     keywords='NGS SAM alignment',
     packages=["samsift"],
-    install_requires=[
-        'pysam',
-        'wheel',
-    ],
+    install_requires=['pysam'],
+    python_requires='>=3.8',
     package_data={
         'samsift': [
             '*.py',
         ],
     },
+    long_description_content_type='text/x-rst',
     entry_points={
         'console_scripts': [
             'samsift = samsift.samsift:main',
