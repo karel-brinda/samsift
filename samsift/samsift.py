@@ -296,7 +296,7 @@ class SamSift:
         info("SAMsift is starting.")
         try:
             # first attempt: open normally
-            with pysam.AlignmentFile(self.in_sam_fn, "rb") as in_sam:  #check_sq=False)
+            with pysam.AlignmentFile(self.in_sam_fn, "rb") as in_sam:
                 self._process_input(in_sam)
         except ValueError as e:
             # fallback for missing @SQ lines
