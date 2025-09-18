@@ -29,7 +29,7 @@ setuptools.setup(
     url='https://github.com/karel-brinda/samsift',
 
     author='Karel Brinda',
-    author_email='kbrinda@hsph.harvard.edu',
+    author_email='karel.brinda@inria.fr',
 
     license='MIT',
 

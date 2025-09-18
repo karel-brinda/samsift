@@ -2,7 +2,7 @@
 
 """Normalize SAM in order to faciliate SAM files comparison.
 
-Author:  Karel Brinda <kbrinda@hsph.harvard.edu>
+Author:  Karel Brinda <karel.brinda@inria.fr>
 
 License: MIT
 """
@@ -96,7 +96,7 @@ def main():
             description=
             "Program: {} ({})\n".format(PROGRAM, DESC)+
             "Version: {}\n".format(VERSION, pysam.__version__) +
-            "Author:  Karel Brinda <kbrinda@hsph.harvard.edu>",
+            "Author:  Karel Brinda <karel.brinda@inria.fr>",
             )
     parser._optionals.title = 'Options'
 
