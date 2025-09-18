@@ -1,7 +1,7 @@
 .PHONY: all help clean cleanall test test_readme test_tests \
         readme rst html \
         format pylint flake8 \
-        inc build pypi_test pypi install sha256 \
+        inc build install sha256 \
         wconda wpypi
 
 SHELL=/usr/bin/env bash -eo pipefail
@@ -93,14 +93,6 @@ build: ## Build
 	$(PYTHON) -m build
 	$(PYTHON) -m twine check dist/*
 
-
-pypi_test: ## Test PyPI upload
-pypi_test: build
-	$(PYTHON) -m twine upload --repository testpypi dist/*
-
-pypi: ## Upload package to PyPI
-pypi: build
-	$(PYTHON) -m twine upload dist/*
 
 install: ## Install using PIP (current env)
 	$(PIP) uninstall -y samsift || true
