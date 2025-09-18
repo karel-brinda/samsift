@@ -93,7 +93,7 @@ Command-line parameters
 .. code-block::
 
 	Program: samsift (advanced filtering and tagging of SAM/BAM alignments using Python expressions)
-	Version: 0.2.5
+	Version: 0.3.0
 	Author:  Karel Brinda <karel.brinda@inria.fr>
 
 	Usage:   samsift.py [-i FILE] [-o FILE] [-f [PY_EXPR ...]] [-c [PY_CODE ...]] [-m STR]
