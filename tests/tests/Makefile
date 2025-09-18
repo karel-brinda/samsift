@@ -4,7 +4,6 @@ SHELL=/usr/bin/env bash -euc -o pipefail
 
 .SECONDARY:
 
-#don't keep warnings (they go to the saved output, breaking diffs, and different PySAM versions use different warnings)
 SIFT=../../samsift/samsift.py
 NORM=../../samsift/samsift_norm_sam.py -H
 SV=samtools view
