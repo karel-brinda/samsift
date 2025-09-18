@@ -21,7 +21,7 @@ PROGRAM='samsift'
 VERSION=version.VERSION
 DESC='advanced filtering and tagging of SAM/BAM alignments using Python expressions'
 
-BASIC_INIT="import datetime; import math; import random; import re;"
+BASIC_INIT="import datetime; import math; import random; import re; random.seed(42);"
 
 
 ALIGNMENT_VARIABLE_NAMES=set([
