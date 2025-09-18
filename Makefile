@@ -1,9 +1,13 @@
-.PHONY: all help clean pypi pypi_test test test_readme test_tests readme rst html inc wpypi wconda sha256 format pylint flake8 install
+.PHONY: all help clean cleanall test test_readme test_tests \
+        readme rst html \
+        format pylint flake8 \
+        inc build pypi_test pypi install sha256 \
+        wconda wpypi
 
 SHELL=/usr/bin/env bash -eo pipefail
 
-PIP=/usr/bin/env pip
 PYTHON=/usr/bin/env python3
+PIP=/usr/bin/env python3 -m pip
 
 .SECONDARY:
 
@@ -83,19 +87,20 @@ inc: ## Increment version
 	./samsift/increment_version.py
 	$(MAKE) readme
 
+build: ## Build
+	$(PYTHON) -m build
+	$(PYTHON) -m twine check dist/*
+
+
 pypi_test: ## Test PyPI upload
-	$(MAKE) clean
-	$(PYTHON) setup.py sdist bdist_wheel
+pypi_test: build
 	$(PYTHON) -m twine upload --repository testpypi dist/*
 
-
 pypi: ## Upload package to PyPI
-	$(MAKE) clean
-	$(PYTHON) setup.py sdist bdist_wheel
+pypi: build
 	$(PYTHON) -m twine upload dist/*
 
-
-install: ## Install using PIP
+install: ## Install using PIP (current env)
 	$(PIP) uninstall -y samsift || true
 	$(PIP) install .
 
