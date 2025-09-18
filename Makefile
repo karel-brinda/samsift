@@ -1,30 +1,127 @@
-.PHONY: all clean pypi test test1 test2 readme rst html inc wpypi wconda sha256 yapf
+.PHONY: all help clean cleanall test test_readme test_tests \
+        readme rst html \
+        format pylint flake8 \
+        inc build pypi_test pypi install sha256 \
+        wconda wpypi
 
-SHELL=/usr/bin/env bash
-SAMS=./samsift/samsift.py
+SHELL=/usr/bin/env bash -eo pipefail
+SAMS=./samsift/samsift.py #used also in tests
+
+
+PYTHON=/usr/bin/env python3
+PIP=/usr/bin/env python3 -m pip
 
 .SECONDARY:
 
+.SUFFIXES:
+
+#################
+## BASIC RULES ##
+#################
+
 all: readme tests/tests/test.bam
 
-clean:
+help: ## Print help messages
+	@echo -e "$$(grep -hE '^\S*(:.*)?##' $(MAKEFILE_LIST) \
+		| sed \
+			-e 's/:.*##\s*/:/' \
+			-e 's/^\(.*\):\(.*\)/   \\x1b[36m\1\\x1b[m:\2/' \
+			-e 's/^\([^#]\)/\1/g' \
+			-e 's/: /:/g' \
+			-e 's/^#\(.*\)#/\\x1b[90m\1\\x1b[m/' \
+		| column -c2 -t -s : )"
+
+clean: ## Clean
 	rm -fr build/ dist/ samsift/__pycache__ samsift.egg-info
 	rm -f *.sam *.bam
 	rm -f README.html README.sh
 	$(MAKE) -C tests clean
 
-pypi:
-	/usr/bin/env python3 setup.py sdist bdist_wheel upload
+cleanall: clean ## Clean all
+
+
+#############
+## TESTING ##
+#############
+
+
+test: ## Test everything
+test: test_readme test_tests
+
 
 tests/tests/test.bam: tests/tests/test.sam
 	samtools view -b "$<" > "$@"
 
+test_readme: ## Test README commands
+	echo "#! /usr/bin/env bash -e -x" > README.sh
+	cat README.rst \
+		| grep -E '       ' \
+		| perl -pe 's/^\s*//g' \
+		| grep -E "^samsift" \
+		| perl -pe 's@^samsift/samsift@samsift@g' \
+		| perl -pe 's@^samsift @$(SAMS) @g' \
+		>> README.sh
+	/usr/bin/env bash README.sh
+
+test_tests: ## Run all tests
+	$(MAKE) -C tests
+
+
+#################
+## MAINTENANCE ##
+#A###############
+
+format: ## Run YAPF (inline replacement)
+	yapf -i --recursive samsift .py tests
+
+pylint: ## Run PyLint
+	$(PYTHON) -m pylint attotree
+
+flake8: ## Run Flake8
+	flake8
+
+
+###############
+## PACKAGING ##
+###############
+
+inc: ## Increment version
+	./samsift/increment_version.py
+	$(MAKE) readme
+
+build: ## Build
+	$(PYTHON) -m build
+	$(PYTHON) -m twine check dist/*
+
+
+pypi_test: ## Test PyPI upload
+pypi_test: build
+	$(PYTHON) -m twine upload --repository testpypi dist/*
+
+pypi: ## Upload package to PyPI
+pypi: build
+	$(PYTHON) -m twine upload dist/*
+
+install: ## Install using PIP (current env)
+	$(PIP) uninstall -y samsift || true
+	$(PIP) install .
+
+
+sha256: ## Compute sha256 for the PyPI package
+	s=$$(curl https://pypi.python.org/pypi/samsift  2>/dev/null| perl -pe 's/#/\n/g' | grep -o 'https.*\.tar\.gz' | xargs curl -L 2>/dev/null | shasum -a 256 | awk '{print $$1;}'); echo $$s; echo $$s | pbcopy
+
+
+#########################
+## DOCUMENTATION & WEB ##
+#########################
+
+readme: ## Update README files
 readme: rst html
 
-html:
+html: ## Convert README to HTML
 	rst2html.py README.rst > README.html
 
-rst:
+rst: ## Update help message in README
 	f=$$(mktemp);\
 	  sed '/USAGE-BEGIN/q' README.rst >> $$f; \
 	  printf '\n.. code-block::\n' >> $$f;\
@@ -36,35 +133,9 @@ rst:
 	  | perl -pe 's/[\s]+$$/\n/g' \
 	  > README.rst;
 
-inc:
-	./samsift/increment_version.py
-	$(MAKE) readme
-
-test: test1 test2
-
-test1:
-	echo "#! /usr/bin/env bash -e -x" > README.sh
-	cat README.rst \
-		| grep -E '       ' \
-		| perl -pe 's/^\s*//g' \
-		| grep -E "^samsift" \
-		| perl -pe 's@^samsift/samsift@samsift@g' \
-		| perl -pe 's@^samsift @$(SAMS) @g' \
-		>> README.sh
-	bash README.sh
-
-test2:
-	$(MAKE) -C tests
-
-wconda:
+wconda: ## Open Bioconda webpage
 	open https://bioconda.github.io/recipes/samsift/README.html
 
-wpypi:
+wpypi: ## Open PyPI webpage
 	open https://pypi.python.org/pypi/samsift
-
-sha256:
-	s=$$(curl https://pypi.python.org/pypi/samsift  2>/dev/null| perl -pe 's/#/\n/g' | grep -o 'https.*\.tar\.gz' | xargs curl -L 2>/dev/null | shasum -a 256 | awk '{print $$1;}'); echo $$s; echo $$s | pbcopy
-
-yapf: ## Run YAPF (inline replacement)
-	yapf -i --recursive samsift setup.py tests
 
