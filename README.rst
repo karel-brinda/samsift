@@ -139,7 +139,8 @@ function and code is executed using the `exec
 <https://docs.python.org/3/library/functions.html#exec>`_ function.
 Initialization can be used for importing Python modules, setting global
 variables (e.g., counters) or loading data from disk. Some modules (namely
-``random`` and ``re``) are loaded without an explicit request.
+``datetime``, ``math``, ``random``, and ``re``) are loaded without an explicit request,
+and the internal RNG seed is set to 42.
 
 *Example* (printing all alignments):
 
