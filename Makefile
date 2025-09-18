@@ -14,7 +14,9 @@ clean:
 	$(MAKE) -C tests clean
 
 pypi:
-	/usr/bin/env python3 setup.py sdist bdist_wheel upload
+	$(MAKE) clean
+	$(PYTHON) setup.py sdist bdist_wheel
+	$(PYTHON) -m twine upload dist/*
 
 tests/tests/test.bam: tests/tests/test.sam
 	samtools view -b "$<" > "$@"
