@@ -1,8 +1,8 @@
 SAMsift
 =======
 
-.. image:: https://travis-ci.org/karel-brinda/samsift.svg?branch=master
-        :target: https://travis-ci.org/karel-brinda/samsift
+.. image:: https://github.com/karel-brinda/samsift/actions/workflows/ci.yml/badge.svg
+        :target: https://github.com/karel-brinda/samsift/actions/workflows/ci.yml
 
 .. image:: https://img.shields.io/badge/install%20with-bioconda-brightgreen.svg?style=flat-square
         :target: https://anaconda.org/bioconda/samsift
@@ -242,4 +242,4 @@ Licence
 Author
 ------
 
-`Karel Brinda <http://brinda.cz>`_ <kbrinda@hsph.harvard.edu>
+`Karel Brinda <http://brinda.eu>`_ <karel.brinda@inria.fr>
