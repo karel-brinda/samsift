@@ -1,7 +1,10 @@
-.PHONY: all clean pypi test test1 test2 readme rst html inc wpypi wconda sha256 yapf
+.PHONY: all clean pypi pypi_test test test1 test2 readme rst html inc wpypi wconda sha256 yapf install
 
 SHELL=/usr/bin/env bash
 SAMS=./samsift/samsift.py
+
+PIP=/usr/bin/env pip
+PYTHON=/usr/bin/env python3
 
 .SECONDARY:
 
@@ -13,10 +16,21 @@ clean:
 	rm -f README.html README.sh
 	$(MAKE) -C tests clean
 
+pypi_test:
+	$(MAKE) clean
+	$(PYTHON) setup.py sdist bdist_wheel
+	$(PYTHON) -m twine upload --repository testpypi dist/*
+
+
 pypi:
 	$(MAKE) clean
 	$(PYTHON) setup.py sdist bdist_wheel
 	$(PYTHON) -m twine upload dist/*
+
+
+install: ## Install using PIP¬
+	$(PIP) uninstall -y samsift || true
+	$(PIP) install .
 
 tests/tests/test.bam: tests/tests/test.sam
 	samtools view -b "$<" > "$@"
