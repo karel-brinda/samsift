@@ -66,5 +66,5 @@ sha256:
 	s=$$(curl https://pypi.python.org/pypi/samsift  2>/dev/null| perl -pe 's/#/\n/g' | grep -o 'https.*\.tar\.gz' | xargs curl -L 2>/dev/null | shasum -a 256 | awk '{print $$1;}'); echo $$s; echo $$s | pbcopy
 
 yapf: ## Run YAPF (inline replacement)
-	yapf -i --recursive prophyle setup.py tests
+	yapf -i --recursive samsift setup.py tests
 
