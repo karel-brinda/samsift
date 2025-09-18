@@ -2,7 +2,7 @@
 
 """SAMsift - advanced filtering and tagging of SAM/BAM alignments using Python expressions
 
-Author:  Karel Brinda <kbrinda@hsph.harvard.edu>
+Author:  Karel Brinda <karel.brinda@inria.fr>
 
 License: MIT
 """
@@ -320,7 +320,7 @@ def parse_args():
             description=
             "Program: {} ({})\n".format(PROGRAM, DESC)+
             "Version: {}\n".format(VERSION, pysam.__version__) +
-            "Author:  Karel Brinda <kbrinda@hsph.harvard.edu>",
+            "Author:  Karel Brinda <karel.brinda@inria.fr>",
             )
     parser._optionals.title = 'Basic options'
 
