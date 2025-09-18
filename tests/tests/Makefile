@@ -29,6 +29,7 @@ _%.debug_samtools.sam: %.bam
 _%.debug_samsift.sam: %.bam
 	($(SIFT) -i $< -d '"\t".join(map(str,[QNAME, FLAG, RNAME, POS, MAPQ, CIGAR, RNEXT, PNEXT, TLEN, SEQ, QUAL]))' \
 		> /dev/null) 2>&1 \
+		| grep -v '^\[E::idx_find_and_load\]' \
 		| grep -v samsift \
 		| cut -f 3- \
 		| cut -f -11 \
