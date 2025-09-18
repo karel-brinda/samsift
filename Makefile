@@ -5,6 +5,8 @@
         wconda wpypi
 
 SHELL=/usr/bin/env bash -eo pipefail
+SAMS=./samsift/samsift.py #used also in tests
+
 
 PYTHON=/usr/bin/env python3
 PIP=/usr/bin/env python3 -m pip
@@ -59,7 +61,7 @@ test_readme: ## Test README commands
 		| perl -pe 's@^samsift/samsift@samsift@g' \
 		| perl -pe 's@^samsift @$(SAMS) @g' \
 		>> README.sh
-	bash README.sh
+	/usr/bin/env bash README.sh
 
 test_tests: ## Run all tests
 	$(MAKE) -C tests
@@ -123,7 +125,7 @@ rst: ## Update help message in README
 	f=$$(mktemp);\
 	  sed '/USAGE-BEGIN/q' README.rst >> $$f; \
 	  printf '\n.. code-block::\n' >> $$f;\
-	  ./samsift/samsift.py -h 2>&1 | perl -pe 's/^(.*)$$/\t\1/g' >> $$f; \
+	  $(SAMS) -h 2>&1 | perl -pe 's/^(.*)$$/\t\1/g' >> $$f; \
 	  printf '\n' >> $$f;\
 	  sed -n '/USAGE-END/,$$ p' README.rst >> $$f;\
 	  cat $$f \
